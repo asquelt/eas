@@ -1,0 +1,152 @@
+#############################################################################
+# This is the eash client configuration file.
+#
+# Usage: key value
+#  [ value ]		= optional value
+#  { value }		= requird value
+#  [ value1 | value2 ]	= value1 OR value2 is optional
+#  { value1 | value2 }	= value1 OR value2 is requird
+#
+# Value: integer|string
+#  integer	= 0 - 65536
+#  string	= alpha-numeric string
+#############################################################################
+
+#############################################################################
+# Usage: Port { value }
+# Default: 5554
+# Value: integer
+# Description:	Which port to use when connecting to log server. 1 - 65536.
+#############################################################################
+Port 5554
+
+#############################################################################
+# Usage: TCPTimeout { value }
+# Default: 2
+# Value: integer
+# Description:	Specify the number of seconds to wait for a TCP connection
+#		to the LogServer.  Default is 2.
+#############################################################################
+TCPTimeout 2
+
+#############################################################################
+# Usage: LogServer { value }
+# Value: string
+# Default: localhost
+# Description:	Specify the IP address or hostname of the remote log server.
+#		Multiple definitions can be used to create a list of log
+#		servers to be tried in the event a log server is unavailable.
+#
+# Note:		Although the default value is localhost, this isn't correct.
+#		You always want to specify a REMOTE LogServer, so that the
+#		audit logs are not stored locally and subject to
+#		manipulation.
+#############################################################################
+LogServer localhost
+#LogServer remotehost1
+#LogServer remotehost2
+#LogServer disasterrecovery1
+#LogServer disasterrecovery2
+
+#############################################################################
+# Usage: DefaultShell { value }
+# Value: string
+# Default: /bin/sh
+# Description:	Specify the default shell eash should use when being called
+#		as a login shell.
+# Special:	This option can be over-rided with the symlink option.  To
+#		use an alternate shell create a symlink to the absolute path
+#		of eash.
+#
+#		The format is: eash_path_to_shell
+#
+#		For example if you want to use the C-shell (/bin/csh):
+#		(assuming eash's absolute path is /usr/local/bin/eash)
+#		(as root)
+#
+#		# ln -s /usr/local/bin/eash /usr/local/bin/eash_bin_csh
+#
+#		Any shell can be appended - just replace "/" with "_"
+#
+#	Note:	All symlinks must be owned by root.
+#############################################################################
+DefaultShell /bin/sh
+
+#############################################################################
+# Syntax: BannerFile { value }
+# Value: string
+# Default: disabled
+# Description:	Specify the corporate policy or banner file to display
+#		before each session.
+# Note:		This file must exist on each EAS client.
+#############################################################################
+#BannerFile /etc/corporate-policy
+
+#############################################################################
+# Syntax: BannerPause { value }
+# Default: -1
+# Value: integer
+# Description:	Specify the number of seconds to pause before the user is
+#		allowed to use the session.  Use -1 to disable.
+#############################################################################
+BannerPause -1
+
+#############################################################################
+# Syntax: Cipher { value1:value2:... }
+# Value: string
+# Default: HIGH:MEDIUM
+# Description:	Define permitted SSL ciphers in a colon delimited list.
+#		For a complete list see "openssl ciphers"
+#############################################################################
+Cipher HIGH:MEDIUM
+
+#############################################################################
+# Syntax: Method { value1 | value2 | value3 | value4 }
+# Value: string
+# Default: SSLv3
+# Description:	OpenSSL method.
+# TLSv1		TLS version 1
+# SSLv2		SSL version 2
+# SSLv3		SSL version 3
+# SSLv23	SSL version 2 and 3 compatibility mode
+#############################################################################
+Method SSLv3
+
+#############################################################################
+# Syntax: PrivateKey { value }
+# Default: /etc/eas/certs/client.pem
+# Value: string
+# Description:	Specify private key and certificate file.  The file should
+#		begin with a PEM encoded private key followed by a PEM
+#		encoded certificate.  The PEM file can contain serveral
+#		certificates that you trust.
+#############################################################################
+PrivateKey @CA_DIR@/client.pem
+
+#############################################################################
+# Syntax: CertificateAuthority { value }
+# Value: string
+# Default: /etc/eas/certs/root.pem
+# Description:	Specify certificate authority file.  If you want to trust
+#		additional certificates, append them to the file.  By
+#		default the certificates in in the PrivateKey are trusted.
+#############################################################################
+CertificateAuthority @CA_DIR@/root.pem
+
+#############################################################################
+# Syntax: RandomFile { value }
+# Value: string
+# Default: disabled
+# Description:	Specify the default file to read(2) random data so that
+#		OpenSSL can be correctly seeded.  Default is /dev/urandom
+#############################################################################
+#RandomFile /dev/urandom
+
+#############################################################################
+# Syntax: EDGFile { value }
+# Value: string
+# Default: disabled
+# Description:	Specify path to Entropy Gathering Daemon socket.  Use this
+#		option if you don't have /dev/urandom or /dev/random
+#############################################################################
+#EGDFile /var/run/egd-pool

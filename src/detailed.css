@@ -1,0 +1,24 @@
+<style type="text/css">
+h2, h3 {margin: 0; border: 1px solid gray;}
+h2 {border-width: 0 0 0 1px; padding: 0 0 0 0.25em}
+h3 {border-width: 1px 1px 0 0; padding: 0.1em 0.33em;}
+table {width: 100%;}
+th {text-align: right; padding: 0 0.5em; border-bottom: 1px solid #DDD;}
+td {text-align: left; padding: 0 0.5em; border-bottom: 1px solid #DDD;}
+td {font: small Verdana, "Andale Mono", Courier, "Courier New", monospace;}
+td {letter-spacing: -1px;}
+td {border-right: 1px solid gray;}
+thead th {vertical-align: bottom; border: 1px solid gray; border-width: 0 1px 1px 0; white-space: normal;}
+th {border-right: 1px solid gray; border-bottom-style: dotted; white-space: nowrap;}
+td.invalid {background: #FF3; color: red;}
+td.rowid {border-right: 1px solid gray;}
+th.date {border-left: 1px solid gray;}
+th.total {border-width: 0 0 0 0px; border-top: 1px solid gray;}
+th.empty {border-width: 0 0 0 0px; border-top: 1px solid gray;}
+</style>
+<style type="text/css" media="screen">
+tr.odd {background: #EEE;}
+tr.odd *, tr.even * {border-bottom: 1px solid #EEE;}
+td.verified {background: #CEC; border-bottom-color: white;}
+td.rowid {font-weight: bold;}
+</style>

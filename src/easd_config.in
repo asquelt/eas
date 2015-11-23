@@ -1,0 +1,343 @@
+#############################################################################
+# This is the easd server configuration file.
+#
+# Usage: key value
+#  [ value ]		= optional value
+#  { value }		= requird value
+#  [ value1 | value2 ]	= value1 OR value2 is optional
+#  { value1 | value2 }	= value1 OR value2 is requird
+#
+# Value: integer|string
+#  integer	= 0 - 65536
+#  string	= alpha-numeric string
+#############################################################################
+
+#############################################################################
+# Section: TCP/IP
+#############################################################################
+# Usage: Port { value }
+# Value: integer
+# Default: 5554
+# Description:	Which port to listen for new requests. 1 - 65536.
+#############################################################################
+Port 5554
+
+#############################################################################
+# Syntax: KeepAlive { value }
+# Value: yes | no
+# Default: yes
+# Description:	Specifies whether the daemon should send TCP keepalive
+#		packets to the client.
+#############################################################################
+KeepAlive yes
+
+#############################################################################
+# Section: Event Notification
+#############################################################################
+# Usage: NotificationHook { value }
+# Value: string
+# Default: disabled
+# Description:	Specify an executable to be called when a user has connected
+#		and authenticated to the server.  This executable will be
+#		forked into the background and a clean environment will be
+#		set with the following environment variables set:
+#
+#		EASH_EFFECTIVE_GID	- effective gid
+#		EASH_EFFECTIVE_GR_NAME	- effective group name
+#		EASH_EFFECTIVE_PW_NAME	- effective username
+#		EASH_EFFECTIVE_UID	- effective uid
+#		EASH_ID			- EAS Audit ID (eas_replay)
+#		EASH_IP			- remote IP address
+#		EASH_ORIGINAL_GID	- original gid
+#		EASH_ORIGINAL_GR_NAME	- original group name
+#		EASH_ORIGINAL_PW_NAME	- original username
+#		EASH_ORIGINAL_UID	- original uid
+#		EASH_REAL_GID		- real gid
+#		EASH_REAL_GR_NAME	- real group name
+#		EASH_REAL_PW_NAME	- real username
+#		EASH_REAL_UID		- real uid
+#		EASH_TERMINAL		- original terminal
+#
+# Note:		This is generally used to send email upon a connection.
+#
+# Example	#!/bin/sh
+# script:	cat <<EOF | mailx -s "$EASH_ORIGINAL_PW_NAME opened a session"
+#		$EASH_ORIGINAL_PW_NAME opened a session as
+#		$EASH_EFFECTIVE_PW_NAME from $EASH_IP
+#
+#		To review this session type `eas_replay $EASH_ID'
+#		EOF
+#		exit 0
+#		
+#############################################################################
+#NotificationHook /usr/libexec/custom_notification_script
+
+#############################################################################
+# Usage: HookFailureCritical { value }
+# Value: yes | no
+# Default: yes
+# Description:	If the executable specified by NotificationHook has return
+#		code of non-zero OR if the executable specified by
+#		NotificationHook fails - EAS will terminate the session.
+#############################################################################
+#HookFailureCritical yes
+
+#############################################################################
+# Usage: HookTimeout { value }
+# Value: integer
+# Default: 5
+# Description:	Use this option to set a timeout on the NotificationHook.
+#		Value is in seconds.  Legal values are 1 - 65536.
+#############################################################################
+#HookTimeout 5
+
+#############################################################################
+# Section: Digital Signatures
+#############################################################################
+# Usage: SignMode { value }
+# Usage: SignOwner { value }
+# Usage: SignInode { value }
+# Usage: SignCtime { value }
+# Usage: SignMtime { value }
+#############################################################################
+# Value: yes | no
+#############################################################################
+# Default: SignMode yes
+# Default: SignOwner yes
+# Default: SignInode no
+# Default: SignCtime no
+# Default: SignMtime no
+#############################################################################
+# Description:	This option will add the file's inode to the SHA1 signature.
+#
+# Special:	Once these options are set, previous audit logs are subject
+#		to the terms of the strictness.  For example if you disable
+#		this option all previous audit logs using this option will
+#		not be verifiable through EAS Replay.
+#
+#		You must have a standard with these options and not change it
+#		mid-stream.
+#
+# Note:		It's highly recommended that the default values be not be
+#		changed.  The default values represent high security and
+#		integrity with the trade-off of being able to copy the audit
+#		logs to a different log server.
+#
+# Option	SignMode	adds the file's permissions to the signature
+# details:	SignOwner	adds the file's uid and gid to the signature
+#		SignInode	adds the file's inode to the signature
+#		SignCtime	adds the file's ctime to the signature
+#				(the file's ctime is changed by writing or by
+#				 setting inode information)
+#					* owner
+#					* group
+#					* link count
+#					* mode
+#					* etc
+#		SignMtime	adds the file's mtime to the signature
+#				(the file's mtime is changed by file
+#				 modifications)
+#					* mknod(2)
+#					* truncate(2)
+#					* pipe(2)
+#					* utime(2)
+#					* write(2) (of more than zero bytes)
+#				The mtime is not changed for changes in
+#				owner, group, link count or mode.
+#############################################################################
+#SignMode yes
+#SignOwner yes
+#SignInode no
+#SignCtime no
+#SignMtime no
+
+#############################################################################
+# Section: EAS Server Configuration
+#############################################################################
+# Usage: PidFile { value }
+# Value: string
+# Default: /var/run/easd.pid
+# Description:	This file will contain the process ID of the easd daemon.
+#############################################################################
+PidFile /var/run/easd.pid
+
+#############################################################################
+# Usage: SessionDirectory { value }
+# Value: string
+# Default: /var/log/easd
+# Description:	This directory will store session output and timing
+#		information.
+#############################################################################
+SessionDirectory /var/log/easd
+
+#############################################################################
+# Usage: User { value }
+# Value: string | integer
+# Default: 0
+# Description:	Specify the name or UID of the user easd should run as.
+#		Please note that the GID will be the default GID of the UID
+#		provided.
+#
+# Special:	This value needs to be set before EAS Daemon is started for
+#		the first time.  It can be changed at a later date under the
+#		following conditions:
+#
+#			1) StrictSignatures is off
+#			2) You recursively change the owner of the
+#			   SessionDirectory and all its files.
+#
+# Note:		It's recommended you never change this value once EAS has
+#		been started for the first time due to the StrictSignatures.
+#		Disabling StrictSignatures increases the risk for
+#		manipulating audit logs.
+#############################################################################
+User 0
+
+#############################################################################
+# Syntax: IdleTimeout { value }
+# Value: integer
+# Default: 7200
+# Description:	Specify idle timeout in seconds.  If the client does not
+#		send output or input within the given timeout the server will
+#		terminate the connection.  A value of -1 will disable the
+#		idle timeout.  Default value of 7200 seconds (2 hours)
+#############################################################################
+IdleTimeout 7200
+
+#############################################################################
+# Usage: Sync { value }
+# Value:  _IONBF | _IOLBF | _IOFBF
+# Default: _IONBF
+# Description:	_IONBF unbuffered
+#		_IOLBF line buffered
+#		_IOFBF fully buffered
+#
+#
+# Special:	If you want to snoop on active sessions, you need to specify
+#		_IOFBF to fully buffer the audit logs.  Using _IONBF or
+#		_IOLBF will lead to unexpected results.
+#
+# Note:		It's recommended that you leave buffering turned off for
+#		performance reasons.  _IONBF is the default setting.
+#############################################################################
+#Sync _IONBF
+
+#############################################################################
+# Section: Syslog Configuration
+#############################################################################
+# Syntax: SyslogFacility { value }
+# Value: string
+# Default: LOG_AUTH
+# Description:	Specify the syslog facility that easd should log to.
+# LOG_AUTH	security/authorization messages (DEFAULT)
+# LOG_CRON	cron and at
+# LOG_DAEMON	system daemons without seperate facility value
+# LOG_FTP	ftp daemon
+# LOG_KERN	kernel messages
+# LOG_LOCAL0 through LOG_LOCAL7
+#		reserved for local use.
+# LOG_LPR	line printer
+# LOG_MAIL	mail
+# LOG_NEWS	USENET
+# LOG_SYSLOG	generally reserved for syslogd
+# LOG_USER	default genertic user-level messages
+# LOG_UUCP	UUCP
+#############################################################################
+SyslogFacility LOG_AUTH
+
+#############################################################################
+# Syntax: SyslogPriority { value }
+# Value: string
+# Default: LOG_INFO
+# Description:	Specify the default syslog priority that easd should log
+#		with.
+# LOG_EMERG	system is unstable
+# LOG_ALERT	action must be taken immediately
+# LOG_CRIT	critical conditions
+# LOG_ERR	error conditions
+# LOG_WARNING	warning conditions
+# LOG_NOTICE	normal, but significant conditions
+# LOG_INFO	information messages (DEFAULT)
+# LOG_DEBUG	debug-level messages
+#
+# Special:      Please note that EAS will always use
+#		LOG_CRIT on critical error conditions.
+#		LOG_ERR on error conditions.
+#		LOG_DEBUG when the LogLevel is set to DEBUG[123]
+#		Otherwise the default SyslogPriority will be used.
+#############################################################################
+SyslogPriority LOG_INFO
+
+#############################################################################
+# Syntax: LogLevel { value }
+# Value: string
+# Default: INFO
+# Description:	Specify the log level for easd.
+# INFO		this is the default (SyslogPriority) - logs informational messages to syslog
+# DEBUG1	debug level 1 (LOG_DEBUG) - logs system calls
+# DEBUG2	debug level 2 (LOG_DEBUG) - logs function calls
+# DEBUG3	debug level 3 (LOG_DEBUG) - (warning) logs all function calls and data
+#############################################################################
+LogLevel INFO
+
+#############################################################################
+# Syntax: Cipher { value1:value2:... }
+# Value: string
+# Default: HIGH:MEDIUM
+# Description:	Define permitted SSL ciphers in a colon delimited list.
+#		For a complete list see "openssl ciphers"
+#############################################################################
+Cipher HIGH:MEDIUM
+
+#############################################################################
+# Section: SSL Configuration
+#############################################################################
+# Syntax: Method { value1 | value2 | value3 | value4 }
+# Value: string
+# Default: SSLv3
+# Description:	OpenSSL method.
+# TLSv1		TLS version 1
+# SSLv2		SSL version 2
+# SSLv3		SSL version 3
+# SSLv23	SSL version 2 and 3 compatibility mode
+#############################################################################
+Method SSLv3
+
+#############################################################################
+# Syntax: PrivateKey { value }
+# Value: string
+# Default: /etc/eas/certs/server.pem
+# Description:	Specify private key and certificate file.  The file should
+#		begin with a PEM encoded private key followed by a PEM
+#		encoded certificate.  The PEM file can contain serveral
+#		certificates that you trust.
+#############################################################################
+PrivateKey @CA_DIR@/server.pem
+
+#############################################################################
+# Syntax: CertificateAuthority { value }
+# Value: string
+# Default: /etc/eas/certs/root.pem
+# Description:	Specify certificate authority file.  If you want to trust
+#		additional certificates, append them to the file.  By
+#		default the certificates in the PrivateKey are trusted.
+#############################################################################
+CertificateAuthority @CA_DIR@/root.pem
+
+#############################################################################
+# Syntax: RandomFile { value }
+# Value: string
+# Default: disabled
+# Description:	Specify the default file to read(2) random data so that
+#		OpenSSL can be correctly seeded.  Default is /dev/urandom
+#############################################################################
+#RandomFile /dev/urandom
+
+#############################################################################
+# Syntax: EDGFile { value }
+# Value: string
+# Default: disabled
+# Description:	Specify path to Entropy Gathering Daemon socket.  Use this
+#		option if you don't have /dev/urandom or /dev/random
+#############################################################################
+#EGDFile /var/run/egd-pool

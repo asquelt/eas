@@ -1,0 +1,286 @@
+#                                               -*- Autoconf -*-
+# $Id: configure.in,v 1.73 2005/11/04 02:06:26 dhanks Exp $
+#
+# EAS - Enterprise Audit Shell
+#
+# Copyright 2005 and $Date: 2005/11/04 02:06:26 $
+#                 Enterprise Readiness, Inc.
+#		  Douglas Richard Hanks, Jr.
+#
+# Licensed under the Open Software License version 2.0
+#
+# This program is free software; you can redistribute it
+# and/or modify it under the terms of the Open Software
+# License, version 2.0 by Lauwrence E. Rosen.
+#
+# This program is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE.  See the Open Software License for details.
+
+AC_PREREQ(2.57)
+AC_INIT(eas, 2.0.0, [dhanks@gnu.com])
+AC_MSG_NOTICE([Configuring eas version 2.0.0])
+AC_CONFIG_SRCDIR([src/])
+AC_CANONICAL_SYSTEM
+
+# Override default
+test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc/eas'
+
+AM_CONFIG_HEADER([config.h])
+AM_INIT_AUTOMAKE(eas, 2.0.00)
+AM_MAINTAINER_MODE
+#CFLAGS="-ansi -pedantic -Wall -Wno-long-long"
+
+# Do project specific stuff here for config.h
+AC_MSG_CHECKING(operating system)
+case "$host_os" in
+	*linux*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DLINUX ${CFLAGS}"
+		;;
+	*solaris*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DSUNOS -D__EXTENSIONS__ ${CFLAGS}"
+		;;
+	*sunos*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DSUNOS -D__EXTENSIONS__ ${CFLAGS}"
+		;;
+	*hpux*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DHPUX -D_HPUX_SOURCE ${CFLAGS}"
+		;;
+	*aix*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DAIX -D_POSIX_SOURCE -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE ${CFLAGS}"
+		;;
+	*freebsd*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DFREEBSD ${CFLAGS}"
+		;;
+	*darwin*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DFREEBSD ${CFLAGS}"
+		;;
+	*openbsd*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DOPENBSD ${CFLAGS}"
+		;;
+	*netbsd*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DOPENBSD ${CFLAGS}"
+		;;
+	*irix*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DIRIX ${CFLAGS}"
+		;;
+	*cygwin*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DCYGWIN ${CFLAGS}"
+		;;
+	*osf*)
+		AC_MSG_RESULT($host_os)
+		CFLAGS="-DOSF ${CFLAGS}"
+		;;
+	*)
+		AC_MSG_ERROR([$host_os is currently not supported.  Please email this to dhanks@gnu.org if you wish to have $host_os supported.])
+		;;
+esac
+
+# Checks for programs.
+AC_PROG_CC
+AC_PROG_LIBTOOL
+AC_PATH_PROG(CAT, cat)
+AC_PATH_PROG(TOUCH, touch)
+AC_PATH_PROG(RM, rm)
+AC_PATH_PROG(OPENSSL, openssl,, "${ssl_prefix}:${ssl_prefix}/bin:$PATH")
+
+# Checks for libraries.
+if test "x$prefix" = "xNONE"
+then
+        prefix="/usr/local"
+        prefix_nondefault="NONE"
+fi
+
+# Stupid redhat bug
+if test -d "/usr/kerberos/include/"
+then
+	CPPFLAGS="-I/usr/kerberos/include/ ${CPPFLAGS}"
+fi
+
+cadir="${sysconfdir}/certs"
+AC_ARG_WITH(cadir,
+[  --with-cadir=PATH       specify path where certificates will be stored.],
+[
+	if test "x$withval" != "x"
+	then
+		cadir=$withval
+	fi
+])
+
+# Check OpenSSL function
+checkopenssl() { :
+	if test -f "$1/include/openssl/ssl.h"
+	then
+		ssldir="$1"
+		return 0
+	fi
+
+	if test -f "$1/include/ssl.h"
+	then
+		ssldir="$1"
+		return 0
+	fi
+
+	return 1
+}
+
+AC_MSG_CHECKING([for OpenSSL location])
+AC_ARG_WITH(ssl,
+[  --with-ssl=DIR          location of OpenSSL SSL libraries and include files],
+	[
+		checkopenssl "$withval"
+	],
+	[
+		for maindir in /usr/local /usr/lib /usr/pkg /usr /var/ssl /opt
+		do
+			for dir in $maindir $maindir/openssl $maindir/ssl
+			do
+				checkopenssl $dir && break 2
+			done
+		done
+	]
+)
+
+if test -z "$ssldir"
+then
+	AC_MSG_RESULT([not found])
+	echo ""
+	echo "Unable to find the OpenSSL library location"
+	echo "Use --with-ssl to specify the location."
+	echo ""
+	exit 1
+fi
+
+AC_MSG_RESULT([$ssldir])
+
+# Check for EGD
+AC_ARG_WITH(egd-socket,
+    [  --with-egd-socket=FILE  Entropy Gathering Daemon socket pathname],
+    [EGD_SOCKET="$withval"]
+)
+if test -n "$EGD_SOCKET"
+then AC_DEFINE_UNQUOTED(EGD_SOCKET, "$EGD_SOCKET", [Entropy Gathering Daemon socket pathname])
+fi
+
+# Check for user-specified random device
+AC_ARG_WITH(random,
+[  --with-random=FILE      read randomness from FILE (default=/dev/urandom)],
+    [RANDOM_FILE="$withval"],
+    [
+        # Check for random device
+        AC_CHECK_FILE("/dev/urandom", RANDOM_FILE="/dev/urandom",)
+    ]
+)
+if test -n "$RANDOM_FILE"
+then AC_SUBST(RANDOM_FILE)
+    AC_DEFINE_UNQUOTED(RANDOM_FILE, "$RANDOM_FILE", [random file])
+fi
+
+# Checks for libraries.
+AC_CHECK_LIB(dl, dlopen)
+AC_CHECK_LIB(nsl, gethostbyname)
+AC_CHECK_LIB(socket, setsockopt)
+AC_CHECK_LIB(util,openpty)
+
+# Add OpenSSL includes and libraries
+#CPPFLAGS="$CPPFLAGS /usr/local/eas/include"
+CPPFLAGS="$CPPFLAGS -I$ssldir/include"
+LIBS="$LIBS -L$ssldir/lib -lssl -lcrypto"
+
+# Checks for header files.
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_CHECK_HEADERS(arpa/inet.h ctype.h dirent.h errno.h fcntl.h features.h libutil.h limits.h netdb.h netinet/in.h pty.h pwd.h sgtty.h signal.h stdarg.h stdio.h stdlib.h string.h string/strings.h stropts.h sys/file.h sys/ioctl.h sys/param.h sys/resource.h sys/socket.h sys/stat.h sys/syslog.h sys/termio.h sys/termios.h sys/time.h sys/types.h sys/wait.h syslog.h termios.h time.h unistd.h usersec.h util.h utmp.h)
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_TYPES(socklen_t,,,
+[
+#include <sys/types.h>
+#include <sys/socket.h>
+])
+
+AC_CHECK_TYPES(sig_atomic_t,,,
+[
+#include <signal.h>
+])
+
+AC_CHECK_TYPES(in_addr_t,,,
+[
+#include <sys/types.h>
+#include <netinet/in.h>
+])
+
+AC_CHECK_TYPES(pid_t,,,
+[
+#include <sys/types.h>
+])
+
+# Checks for library functions.
+AC_FUNC_FORK
+AC_PROG_GCC_TRADITIONAL
+AC_FUNC_SELECT_ARGTYPES
+
+AC_CHECK_FUNCS(openpty cfmakeraw gettimeofday getusershell localtime setpenv)
+
+CA_DIR=`eval echo $cadir`; CA_DIR=`eval echo $CA_DIR`
+AC_SUBST([CA_DIR])
+AC_DEFINE_UNQUOTED(CA_DIR, "$CA_DIR", [certificate directory])
+
+CONF_DIR=`eval echo $sysconfdir`; CONF_DIR=`eval echo $CONF_DIR`
+AC_SUBST([CONF_DIR])
+AC_DEFINE_UNQUOTED(CONF_DIR, "$CONF_DIR", [configuration directory])
+
+EASHD_CONFIG=`eval echo $sysconfdir/easd_config`; EASHD_CONFIG=`eval echo $EASHD_CONFIG`
+AC_SUBST([EASHD_CONFIG])
+AC_DEFINE_UNQUOTED(EASHD_CONFIG, "$EASHD_CONFIG", [easd configuration file])
+
+EASH_CONFIG=`eval echo $sysconfdir/eash_config`; EASH_CONFIG=`eval echo $EASH_CONFIG`
+AC_SUBST([EASH_CONFIG])
+AC_DEFINE_UNQUOTED(EASH_CONFIG, "$EASH_CONFIG", [eash configuration file])
+
+AC_CONFIG_FILES([Makefile src/Makefile sqlite/Makefile src/eash_config src/easd_config])
+
+AC_OUTPUT()
+
+# Print summary
+A=`eval echo $bindir`; A=`eval echo $A`
+B=`eval echo $sbindir`; B=`eval echo $B`
+C=`eval echo $sysconfdir`; C=`eval echo $C`
+D=`eval echo $mandir`; D=`eval echo $D`
+echo "============================================================================="
+echo "Entperprise Audit Shell $VERSION has been configured with the following options:"
+echo ""
+echo "            User binaries: $A"
+echo "          System binaries: $B"
+echo "      Configuration files: $C"
+echo "    Certificate Directory: $CA_DIR"
+echo "             Manual pages: $D"
+echo ""
+echo "                     Host: $host"
+echo "                 Compiler: $CC"
+echo "           Compiler flags: $CFLAGS"
+echo "       Preprocessor flags: $CPPFLAGS"
+echo "             Linker flags: $LDFLAGS"
+echo "                Libraries: $LIBS"
+echo ""
+echo "          Randomness file: $RANDOM_FILE"
+if test -n "$EGD_SOCKET"
+then
+	echo "                  Use EGD: yes"
+else
+	echo "                  Use EGD: no"
+fi
+echo ""
+echo "============================================================================="

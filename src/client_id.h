@@ -1,0 +1,45 @@
+struct client_id
+{
+        char real_pw_name[BUFSIZ];
+        char real_gr_name[BUFSIZ];
+        char effective_pw_name[BUFSIZ];
+        char effective_gr_name[BUFSIZ];
+        char original_pw_name[BUFSIZ];
+        char original_gr_name[BUFSIZ];
+        char terminal[BUFSIZ];
+        char user_string[BUFSIZ];
+        char dns[BUFSIZ];
+        char ip[BUFSIZ];
+        char remote_command[BUFSIZ];
+        char cipher[BUFSIZ];
+        char method[BUFSIZ];
+        char key[BUFSIZ];
+	char file_session[BUFSIZ];
+	char hash_session[BUFSIZ];
+	char created[BUFSIZ];
+	char modified[BUFSIZ];
+	char accessed[BUFSIZ];
+	char shell[BUFSIZ];
+	char home[BUFSIZ];
+	char type[BUFSIZ];
+	char stype[BUFSIZ];
+	char status[BUFSIZ];
+        uid_t real_uid;
+        uid_t effective_uid;
+        uid_t original_uid;
+        gid_t real_gid;
+        gid_t effective_gid;
+        uid_t original_gid;
+	int port;
+	int idle;
+	int rowid;
+	int real;
+	int eject;
+	int pid;
+	int pty_session;
+	int duration;
+	int ready;
+	FILE *session;
+};
+
+int get_client_id(struct client_id *);
