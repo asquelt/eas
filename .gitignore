@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+# Backups
+*~
+
+# Certs
+certs/*.pem
