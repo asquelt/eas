@@ -183,6 +183,14 @@ int main(int argc, char **argv)
 
 	strncpy(progname, argv[0], sizeof(progname) - 1);
 
+	init_options();
+
+	if(load_config(EASH_CONFIG) < 0)
+	{
+		fprintf(stderr, "load_config(%.100s) failed\n", EASH_CONFIG);
+		exit(EXIT_FAILURE);
+	}
+
 	while((c = getopt(argc, argv, "c:?hvV")) != EOF)
 	{
 		switch(c)
@@ -215,14 +223,6 @@ int main(int argc, char **argv)
 				exit(EXIT_FAILURE);
 				break;
 		}
-	}
-
-	init_options();
-
-	if(load_config(EASH_CONFIG) < 0)
-	{
-		fprintf(stderr, "load_config(%.100s) failed\n", EASH_CONFIG);
-		exit(EXIT_FAILURE);
 	}
 
 	if(get_client_id(&cid) < 0)
