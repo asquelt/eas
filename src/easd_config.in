@@ -191,7 +191,7 @@ SessionDirectory /var/log/easd
 #		Disabling StrictSignatures increases the risk for
 #		manipulating audit logs.
 #############################################################################
-User 0
+User easd
 
 #############################################################################
 # Syntax: IdleTimeout { value }
