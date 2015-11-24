@@ -673,6 +673,7 @@ int parse_protocol(SSL *ssl_socket, struct client_info *c, const void *line)
         int original_gid;
 	static int helo = 0;
 	static int user = 0;
+        int sqlite_c;
 
         if(!line)
                 return(-1);
@@ -738,7 +739,14 @@ int parse_protocol(SSL *ssl_socket, struct client_info *c, const void *line)
 
 		sqlite3_busy_timeout(db, 2000);
 
-		if(sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL) != SQLITE_OK)
+		sqlite_c = 0;
+
+		while(sqlite3_exec(db, "BEGIN IMMEDIATE TRANSACTION;", NULL, NULL, NULL) != SQLITE_OK && sqlite_c++ <= 100)
+		{
+			s_log(eERROR, "sqlite3_exec - waiting for db (%02i): %.100s", sqlite_c, sqlite3_errmsg(db));
+			sleep(2);
+		}
+		if(sqlite_c == 100)
 		{
 			s_log(eERROR, "sqlite3_exec: %.100s", sqlite3_errmsg(db));
 			sqlite3_close(db);
@@ -840,13 +848,6 @@ int parse_protocol(SSL *ssl_socket, struct client_info *c, const void *line)
 
 		sqlite3_finalize(statement);
 
-		if(sqlite3_exec(db, "COMMIT;", NULL, NULL, NULL) != SQLITE_OK)
-		{
-			s_log(eERROR, "sqlite3_exec: %.100s", sqlite3_errmsg(db));
-			sqlite3_close(db);
-			return(-1);
-		}
-
 		if(sqlite3_prepare(db, "UPDATE USER SET file_session=? WHERE id=?", -1, &statement, NULL) != SQLITE_OK)
 		{
 			s_log(eERROR, "sqlite3_prepare: %.100s", sqlite3_errmsg(db));
@@ -865,6 +866,14 @@ int parse_protocol(SSL *ssl_socket, struct client_info *c, const void *line)
 		}
 
 		sqlite3_finalize(statement);
+
+		if(sqlite3_exec(db, "COMMIT;", NULL, NULL, NULL) != SQLITE_OK)
+		{
+			s_log(eERROR, "sqlite3_exec: %.100s", sqlite3_errmsg(db));
+			sqlite3_close(db);
+			return(-1);
+		}
+
 		sqlite3_close(db);
 
 		memset(tmpdir, '\0', sizeof(tmpdir));
