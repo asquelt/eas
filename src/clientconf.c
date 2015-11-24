@@ -75,6 +75,7 @@ typedef enum
 	eTCPTimeout,
 	eBannerFile,
 	eBannerPause,
+	eShutUp,
 	eEGDFile
 } ConfigKey;
 
@@ -102,6 +103,7 @@ static struct
 	{ "egdfile", eEGDFile },
 	{ "bannerfile", eBannerFile },
 	{ "bannerpause", eBannerPause },
+	{ "shutup", eShutUp },
 	{ NULL, eBadOption }
 };
 
@@ -163,6 +165,7 @@ void init_options(void)
 	option.banner_pause = -1;
 	option.facility = LOG_AUTH;
 	option.priority = LOG_INFO;
+	option.level = eINFO;
 	option.method = SSLv3_client_method();
 	option.pemfile = "/etc/eas/certs/client.pem";
 	option.egdfile = 0;
@@ -172,6 +175,7 @@ void init_options(void)
 	option.default_shell = "/bin/sh";
 	option.banner = 0;
 	option.tcptimeout = 2;
+	option.shutup = 0;
 
 	return;
 }
@@ -419,6 +423,17 @@ int load_config(const char *file)
 
 						option.log_servers[x + 1] = 0;
 						break;
+                                        case eShutUp:
+                                                if(!(strcasecmp(val, "yes")))
+                                                        option.shutup = 1;
+                                                else if(!(strcasecmp(val, "no")))
+                                                        option.shutup = 0;
+                                                else
+                                                {
+                                                        fprintf(stderr, "[%.100s, line %i]: invalid argument.  yes or no.\n", file, ln);
+                                                        return(-1);
+                                                }
+                                                break;
 					case eBadOption:
 						fprintf(stderr, "[%.100s, line %i]: bad configuration option: %.63s\n", file, ln, key);
 						return(-1);

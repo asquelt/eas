@@ -118,7 +118,9 @@ int get_client_id(struct client_id *c)
 	else
 	{
 		/* ttyname() from above failed - so set the terminal string to the error message */
-		if(strerror(errno))
+		if(!isatty(STDIN_FILENO))
+			snprintf(c->terminal, sizeof(c->terminal) - 1, "not a terminal");
+		else if(strerror(errno))
 			snprintf(c->terminal, sizeof(c->terminal) - 1, "error: %.100s (%i)", strerror(errno), errno);
 		else
 			snprintf(c->terminal, sizeof(c->terminal) - 1, "error: ttyname() failed and no errno was set");

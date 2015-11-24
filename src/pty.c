@@ -398,9 +398,9 @@ int main(int argc, char **argv)
 
 		dport = option.port;
 		if(!command)
-			fprintf(stderr, "[i] trying %.100s:%d ... ", inet_ntoa(dip), dport);
+			log_or_term(stderr, "[i] trying %.100s:%d ... ", inet_ntoa(dip), dport);
 
-		if((sock = ssl_connect_ip(&dip, dport, sport, &ssl, &ctx, option.method, option.tcptimeout, command ? 0 : 1)) == -1)
+		if((sock = ssl_connect_ip(&dip, dport, sport, &ssl, &ctx, option.method, option.tcptimeout, command ? 0 : option.shutup ? 0 : 1)) == -1)
 		{
 			c++;
 		}
@@ -415,7 +415,7 @@ int main(int argc, char **argv)
 		fprintf(stderr, "[i] exhausted list of log servers.\n");
 		if(loginshell)
 		{
-			fprintf(stderr, "(detected login shell - intentional 5 second pause)\n");
+			log_or_term(stderr, "(detected login shell - intentional 5 second pause)\n");
 			sleep(5);
 		}
 		exit(EXIT_FAILURE);
@@ -424,11 +424,33 @@ int main(int argc, char **argv)
 	eash_handshake();
 	eash_validate();
 
+        /* skip logging contents of non-interactive non-pty shell sessions */
+        if( command && 
+            ( isatty(STDIN_FILENO) == 0 ||
+              isatty(STDOUT_FILENO) == 0 ||
+              isatty(STDERR_FILENO) == 0 ||
+              getlogin() == NULL 
+            )
+          )
+        {
+            char *av[6];
+            av[0] = "/bin/sh";
+            av[1] = "-sh";
+            av[2] = "-c";
+            av[3] = command;
+            av[4] = 0;
+
+            if(eash_execve(av, env_list) < 0)
+               exit(EXIT_FAILURE);
+            /* this shouldn't happen */
+            exit(EXIT_FAILURE);
+        }
+
 	if(*argv)
 	{
 		if((fscript = fopen(*argv, "w")) == (FILE *) 0)
 		{
-			fprintf(stderr, "fopen: %.100s: %.100s (%i)\n", *argv, strerror(errno), errno);
+			log_or_term(stderr, "fopen: %.100s: %.100s (%i)\n", *argv, strerror(errno), errno);
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -439,7 +461,7 @@ int main(int argc, char **argv)
 
 	if(openpty(&master_fd, &slave_fd, slave, NULL, NULL) < 0)
 	{
-		fprintf(stderr, "openpty: %.100s (%i)\n", strerror(errno), errno);
+		log_or_term(stderr, "openpty: %.100s (%i)\n", strerror(errno), errno);
 		shutdown_pty(1);
 		exit(EXIT_FAILURE);
 	}
@@ -455,14 +477,14 @@ int main(int argc, char **argv)
 
 			if((slave_fd = open(slave, O_RDWR)) < 0)
 			{
-				fprintf(stderr, "open(%.100s): %.100s (%i)\n", slave, strerror(errno), errno);
+				log_or_term(stderr, "open(%.100s): %.100s (%i)\n", slave, strerror(errno), errno);
 				shutdown_pty(1);
 				exit(EXIT_FAILURE);
 			}
 #ifdef TIOCSCTTY
 			if(ioctl(STDIN_FILENO, TIOCSCTTY, NULL) < 0)
 			{
-				fprintf(stderr, "ioctl: %.100s (%i)\n", strerror(errno), errno);
+				log_or_term(stderr, "ioctl: %.100s (%i)\n", strerror(errno), errno);
 				shutdown_pty(1);
 				exit(EXIT_FAILURE);
 			}
@@ -499,7 +521,7 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					fprintf(stderr, "%.63s: warning: %.100s: %.100s (%i)\n", basename(progname), option.banner, strerror(errno), errno);
+					log_or_term(stderr, "%.63s: warning: %.100s: %.100s (%i)\n", basename(progname), option.banner, strerror(errno), errno);
 				}
 
 				if(option.banner_pause > 0)
@@ -522,7 +544,7 @@ int main(int argc, char **argv)
 				av[4] = 0;
 
 				if(chdir(cid.home) < 0)
-					fprintf(stderr, "%.63s: warning: chdir(%.127s): %.100s (%i)\n",
+					log_or_term(stderr, "%.63s: warning: chdir(%.127s): %.100s (%i)\n",
 						basename(progname), cid.home, strerror(errno), errno);
 
 				if(eash_execve(av, env_list) < 0)
@@ -543,12 +565,12 @@ int main(int argc, char **argv)
 				av[5] = 0;
 
 				if(chdir(cid.home) < 0)
-					fprintf(stderr, "%.63s: warning: chdir(%.127s): %.100s (%i)\n",
+					log_or_term(stderr, "%.63s: warning: chdir(%.127s): %.100s (%i)\n",
 						basename(progname), cid.home, strerror(errno), errno);
 
 				if(eash_execve(av, env_list) < 0)
 				{
-					fprintf(stderr, "debug: eash_execve -1\n");
+					log_or_term(stderr, "debug: eash_execve -1\n");
 					exit(EXIT_FAILURE);
 				}
 			}
@@ -558,7 +580,7 @@ int main(int argc, char **argv)
 
 			break;
 		case -1:
-			fprintf(stderr, "fork(): %.100s (%i)\n", strerror(errno), errno);
+			log_or_term(stderr, "fork(): %.100s (%i)\n", strerror(errno), errno);
 			shutdown_pty(1);
 			exit(EXIT_FAILURE);
 			break;
@@ -616,7 +638,7 @@ int main(int argc, char **argv)
 
 		if(received_sigpipe)
 		{
-			fprintf(stderr, "%.63s: received SIGPIPE: exitting immediately.\n", basename(progname));
+			log_or_term(stderr, "%.63s: received SIGPIPE: exitting immediately.\n", basename(progname));
 			shutdown_pty(1);
 			exit(EXIT_FAILURE);
 		}
@@ -627,7 +649,7 @@ int main(int argc, char **argv)
 			if(errno == EINTR)
 				continue;
 
-			fprintf(stderr, "select: %.100s (%i)\n", strerror(errno), errno);
+			log_or_term(stderr, "select: %.100s (%i)\n", strerror(errno), errno);
 			shutdown_pty(1);
 			exit(EXIT_FAILURE);
 		}
@@ -647,7 +669,7 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					fprintf(stderr, "[!] connection closed by foriegn host.\n");
+					log_or_term(stderr, "[!] connection closed by foriegn host.\n");
 					break;
 				}
 			}
@@ -672,14 +694,14 @@ int main(int argc, char **argv)
 
 			if(write(STDIN_FILENO, buf, n) != n)
 			{
-				fprintf(stderr, "%.63s: write(%i): %.100s (%i)\n", basename(progname), STDIN_FILENO, strerror(errno), errno);
+				log_or_term(stderr, "%.63s: output write(%i): %.100s (%i)\n", basename(progname), STDIN_FILENO, strerror(errno), errno);
 				shutdown_pty(1);
 				exit(EXIT_FAILURE);
 			}
 
 			if(ssl_write(ssl, buf, n) < 0)
 			{
-				fprintf(stderr, "%.63s: output: ssl_write:\n", basename(progname));
+				log_or_term(stderr, "%.63s: output: ssl_write:\n", basename(progname));
 				shutdown_pty(1);
 				exit(EXIT_FAILURE);
 			}
@@ -707,14 +729,14 @@ int main(int argc, char **argv)
 					continue;
 				else
 				{
-					fprintf(stderr, "read(%i): %.100s (%i)\n", STDIN_FILENO, strerror(errno), errno);
+					log_or_term(stderr, "read(%i): %.100s (%i)\n", STDIN_FILENO, strerror(errno), errno);
 					break;
 				}
 			}
 
 			if(write(master_fd, buf, n) != n)
 			{
-				fprintf(stderr, "%.63s: write(%i): %.100s (%i)\n", basename(progname), master_fd, strerror(errno), errno);
+				log_or_term(stderr, "%.63s: input write(%i): %.100s (%i)\n", basename(progname), master_fd, strerror(errno), errno);
 				shutdown_pty(1);
 				exit(EXIT_FAILURE);
 			}
@@ -746,7 +768,7 @@ void shutdown_pty(int error)
 		system("clear");
 	*/
 	if(!command && !error)
-		fprintf(stderr, "(eash closed)\n");
+		log_or_term(stderr, "(eash closed)\n");
 	return;
 }
 
@@ -775,7 +797,7 @@ static void signal_handler(int signum)
 	switch(signum)
 	{
 		case SIGHUP:
-			fprintf(stdout, "HUP\n");
+			log_or_term(stdout, "HUP\n");
 			break;
 		case SIGCHLD:
 			waitpid(-1, NULL, WNOHANG);
@@ -784,7 +806,7 @@ static void signal_handler(int signum)
 		case SIGQUIT:
 		case SIGTERM:
 		case SIGABRT:
-			fprintf(stderr, "[!] forcefully stopped.\n");
+			log_or_term(stderr, "[!] forcefully stopped.\n");
 			shutdown_pty(0);
 			exit(EXIT_SUCCESS);
 			break;
@@ -827,7 +849,7 @@ void eash_handshake(void)
 
 	if(uname(&u) < 0)
 	{
-		fprintf(stderr, "uname: %.100s (%i)\n", strerror(errno), errno);
+		log_or_term(stderr, "uname: %.100s (%i)\n", strerror(errno), errno);
 		shutdown_pty(1);
 		exit(EXIT_FAILURE);
 	}
@@ -849,13 +871,13 @@ int eash_setuid(uid_t uid)
 #if defined(_AIX)
 	if(setpcred(getpwuid(uid)->pw_name, 0) < 0)
 	{
-		fprintf(stderr, "setpcred(%i, NULL): %.100s (%i)\n", uid, strerror(errno), errno);
+		log_or_term(stderr, "setpcred(%i, NULL): %.100s (%i)\n", uid, strerror(errno), errno);
 		return(-1);
 	}
 #else
 	if(setuid(uid) < 0)
 	{
-		fprintf(stderr, "setuid(%i): %.100s (%i)\n", uid, strerror(errno), errno);
+		log_or_term(stderr, "setuid(%i): %.100s (%i)\n", uid, strerror(errno), errno);
 		return(-1);
 	}
 #endif
@@ -870,29 +892,29 @@ int eash_execve(char * const argv[], char * const envp[])
 	/* setpenv likes argv to be in the format of execv when used with PENV_INIT */
 	if(setpenv(cid.real_pw_name, PENV_ARGV|PENV_INIT, (char **) envp, (char *) argv) < 0)
 	{
-		fprintf(stderr, "setpenv(%.63s, PENV_ARGV|PENV_INIT, envp, argv): %.100s (%i)\n", cid.real_pw_name, strerror(errno), errno);
+		log_or_term(stderr, "setpenv(%.63s, PENV_ARGV|PENV_INIT, envp, argv): %.100s (%i)\n", cid.real_pw_name, strerror(errno), errno);
 
 		for(i = 0; envp[i]; i++)
-			fprintf(stderr, "debug: envp[%i] = %.127s\n", i, envp[i]);
+			log_or_term(stderr, "debug: envp[%i] = %.127s\n", i, envp[i]);
 		for(i = 0; argv[i]; i++)
-			fprintf(stderr, "debug: argv[%i] = %.127s\n", i, argv[i]);
+			log_or_term(stderr, "debug: argv[%i] = %.127s\n", i, argv[i]);
 
 		return(-1);
 	}
 
-	fprintf(stderr, "internal error: setpenv(%.63s): %.100s (%i)\n", cid.real_pw_name, strerror(errno), errno);
+	log_or_term(stderr, "internal error: setpenv(%.63s): %.100s (%i)\n", cid.real_pw_name, strerror(errno), errno);
 	return(-1);
 #else
 	/* argv[0] = filename
 	*  argv + 1 = execve formatted argv */
 	execve(argv[0], argv + 1, envp);
 
-	fprintf(stderr, "internal error: execve(%.127s, argv, envp): %.100s (%i)\n", argv[0], strerror(errno), errno);
+	log_or_term(stderr, "internal error: execve(%.127s, argv, envp): %.100s (%i)\n", argv[0], strerror(errno), errno);
 
 	for(i = 0; argv[i]; i++)
-		fprintf(stderr, "debug: argv[%i] = %.127s\n", i, argv[i]);
+		log_or_term(stderr, "debug: argv[%i] = %.127s\n", i, argv[i]);
 	for(i = 0; envp[i]; i++)
-		fprintf(stderr, "debug: envp[%i] = %.127s\n", i, envp[i]);
+		log_or_term(stderr, "debug: envp[%i] = %.127s\n", i, envp[i]);
 
 	return(-1);
 #endif
@@ -1006,7 +1028,7 @@ static char *eash_assign_shell(const char *arg)
 	}
 
 	/* code never reached */
-	fprintf(stderr, "%.63s: internal error: eash_assign_shell: reached non-reachable code.\n", basename(progname));
+	log_or_term(stderr, "%.63s: internal error: eash_assign_shell: reached non-reachable code.\n", basename(progname));
 	return(0);
 }
 
@@ -1038,14 +1060,14 @@ static char *eash_parse_shell(const char *str)
 		}
 	}
 
-	fprintf(stderr, "%.63s: internal error: eash_parse_shell: nothing to parse: str = '%.127s'\n", basename(progname), str);
+	log_or_term(stderr, "%.63s: internal error: eash_parse_shell: nothing to parse: str = '%.127s'\n", basename(progname), str);
 	return(0);
 }
 
 void eash_validate(void)
 {
 	if(!command)
-		fprintf(stderr, "Awaiting EAS central server validation ... ");
+		log_or_term(stderr, "Awaiting EAS central server validation ... ");
 	while(1)
 	{
 		fd_set fds;
@@ -1057,7 +1079,7 @@ void eash_validate(void)
 
 		if(received_sigpipe)
 		{
-			fprintf(stderr, "%.63s: received SIGPIPE: exitting immediately.\n", basename(progname));
+			log_or_term(stderr, "%.63s: received SIGPIPE: exitting immediately.\n", basename(progname));
 			shutdown_pty(1);
 			exit(EXIT_FAILURE);
 		}
@@ -1068,7 +1090,7 @@ void eash_validate(void)
 			if(errno == EINTR)
 				continue;
 
-			fprintf(stderr, "select: %.100s (%i)\n", strerror(errno), errno);
+			log_or_term(stderr, "select: %.100s (%i)\n", strerror(errno), errno);
 			exit(EXIT_FAILURE);
 		}
 
@@ -1078,7 +1100,7 @@ void eash_validate(void)
 		{
 			if((n = ssl_readline(ssl, buf, sizeof(buf) - 1)) <= 0)
 			{
-				fprintf(stderr, "%.63s: [%.63s, %i]: ssl_readline = %i\n", basename(progname), __FILE__, __LINE__, n);
+				log_or_term(stderr, "%.63s: [%.63s, %i]: ssl_readline = %i\n", basename(progname), __FILE__, __LINE__, n);
 				exit(EXIT_FAILURE);
 			}
 
@@ -1088,41 +1110,54 @@ void eash_validate(void)
 			if(!strcmp(buf, "OK"))
 			{
 				if(!command)
-					fprintf(stderr, "granted.\n");
+					log_or_term(stderr, "granted.\n");
 				return;
 			}
 			else if(!strcmp(buf, "DENY TIMEOUT"))
 			{
 				if(!command)
-					fprintf(stderr, "denied (reason: hook timeout).\n");
+					log_or_term(stderr, "denied (reason: hook timeout).\n");
 				else
-					fprintf(stderr, "%.63s: EAS central server has denied your request (reason: hook timeout).\n", basename(progname));
+					log_or_term(stderr, "%.63s: EAS central server has denied your request (reason: hook timeout).\n", basename(progname));
 				exit(EXIT_FAILURE);
 			}
 			else if(!strcmp(buf, "DENY EVAL"))
 			{
 				if(!command)
-					fprintf(stderr, "denied (reason: trail-version - expired).\n");
+					log_or_term(stderr, "denied (reason: trail-version - expired).\n");
 				else
-					fprintf(stderr, "%.63s: EAS central server has denied your request (reason: trail-version - expired).\n", basename(progname));
+					log_or_term(stderr, "%.63s: EAS central server has denied your request (reason: trail-version - expired).\n", basename(progname));
 				exit(EXIT_FAILURE);
 			}
 			else if(!strcmp(buf, "DENY HOOK"))
 			{
 				if(!command)
-					fprintf(stderr, "denied (reason: hook returned non-zero).\n");
+					log_or_term(stderr, "denied (reason: hook returned non-zero).\n");
 				else
-					fprintf(stderr, "%.63s: EAS central server has denied your request (reason: hook returned non-zero).\n", basename(progname));
+					log_or_term(stderr, "%.63s: EAS central server has denied your request (reason: hook returned non-zero).\n", basename(progname));
 				exit(EXIT_FAILURE);
 			}
 			else
 			{
 				if(!command)
-					fprintf(stderr, "denied (reason: none specified).\n");
+					log_or_term(stderr, "denied (reason: none specified).\n");
 				else
-					fprintf(stderr, "%.63s: EAS central server has denied your request (reason: none specified).\n", basename(progname));
+					log_or_term(stderr, "%.63s: EAS central server has denied your request (reason: none specified).\n", basename(progname));
 				exit(EXIT_FAILURE);
 			}
 		}
 	}
+}
+
+void log_or_term(FILE *stream, const char *fmt, va_list args)
+{
+	/* BUG: i can't make it log
+	if(option.shutup)
+	        c_log(eINFO, fmt, args);
+	else
+		fprintf(stream, fmt, args);
+	*/
+
+	if(!option.shutup)
+		fprintf(stream, fmt, args);
 }

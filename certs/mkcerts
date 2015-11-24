@@ -18,10 +18,10 @@ touch CA/index.txt
 echo 01 > CA/serial
 
 # Do the work
-cat banners/1 && $OPENSSL req -newkey rsa:1024 -keyout CA/private/cakey.pem -out CA/careq.pem -config conf/root.cnf
-cat banners/2 && $OPENSSL ca -config conf/root.cnf -out root.pem -days 1095 -batch -keyfile CA/private/cakey.pem -selfsign -infiles CA/careq.pem
+cat banners/1 && $OPENSSL req -newkey rsa:1048 -keyout CA/private/cakey.pem -out CA/careq.pem -config conf/root.cnf
+cat banners/2 && $OPENSSL ca -config conf/root.cnf -out root.pem -days 3650 -batch -keyfile CA/private/cakey.pem -selfsign -infiles CA/careq.pem
 
-cat banners/3 && $OPENSSL req -newkey rsa:1024 -config conf/root.cnf -keyout client.pem -out newreq.pem -days 365
+cat banners/3 && $OPENSSL req -newkey rsa:1048 -config conf/client.cnf -keyout client.pem -out newreq.pem -days 365
 cat banners/4 && $OPENSSL ca  -config conf/root.cnf -batch -out newcert.pem -infiles newreq.pem
 cat banners/5 && $OPENSSL rsa < client.pem > client.key
 cat client.key newcert.pem > client.pem
@@ -29,7 +29,7 @@ rm -f client.key
 rm -f newcert.pem
 rm -f newreq.pem
 
-cat banners/6 && $OPENSSL req -newkey rsa:1024 -config conf/root.cnf -keyout server.pem -out newreq.pem -days 365
+cat banners/6 && $OPENSSL req -newkey rsa:1048 -config conf/server.cnf -keyout server.pem -out newreq.pem -days 365
 cat banners/7 && $OPENSSL ca  -config conf/root.cnf -batch -out newcert.pem -infiles newreq.pem
 cat banners/5 && $OPENSSL rsa < server.pem > server.key
 cat server.key newcert.pem > server.pem

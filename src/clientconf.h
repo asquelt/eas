@@ -8,6 +8,7 @@ struct ClientOption
 	char *cipher;
 	char *default_shell;
 	char *banner;
+	char *shutup;
 	int port;
 	int banner_pause;
 	int facility;

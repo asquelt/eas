@@ -150,3 +150,13 @@ CertificateAuthority @CA_DIR@/root.pem
 #		option if you don't have /dev/urandom or /dev/random
 #############################################################################
 #EGDFile /var/run/egd-pool
+
+#############################################################################
+# Syntax: ShutUp { value }
+# Value: yes | no
+# Default: no
+# Description: Specify whether eash should cease to emit any informational
+#              messages before passing control to real shell (just be quiet
+#              unless there is some error)
+#############################################################################
+#ShutUp yes
