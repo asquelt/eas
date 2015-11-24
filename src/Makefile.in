@@ -558,26 +558,26 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 
 
 config-setup:
-	test -d "$(sysconfdir)" || ( mkdir -p "$(DESTDIR)$(sysconfdir)" && chmod 700 "$(DESTDIR)$(sysconfdir)" )
-	test -f "$(sysconfdir)/eash_config" || ( cp eash_config "$(DESTDIR)$(sysconfdir)/eash_config" && chmod 400 "$(DESTDIR)$(sysconfdir)/eash_config" )
-	test -f "$(sysconfdir)/easd_config" || ( cp easd_config "$(DESTDIR)$(sysconfdir)/easd_config" && chmod 400 "$(DESTDIR)$(sysconfdir)/easd_config" )
-	test -d "$(CA_DIR)" || ( mkdir -p "$(DESTDIR)$(CA_DIR)" && chmod 700 "$(DESTDIR)$(CA_DIR)" )
-	test -f "$(CA_DIR)/root.pem" || ( cp root.pem "$(DESTDIR)$(CA_DIR)/root.pem" && chmod 400 "$(DESTDIR)$(CA_DIR)/root.pem" )
-	test -f "$(CA_DIR)/client.pem" || ( cp client.pem "$(DESTDIR)$(CA_DIR)/client.pem" && chmod 400 "$(DESTDIR)$(CA_DIR)/client.pem" )
-	test -f "$(CA_DIR)/server.pem" || ( cp server.pem "$(DESTDIR)$(CA_DIR)/server.pem" && chmod 400 "$(DESTDIR)$(CA_DIR)/server.pem" )
+	test -d "$(DESTDIR)$(sysconfdir)" || ( mkdir -p "$(DESTDIR)$(sysconfdir)" && chmod 700 "$(DESTDIR)$(sysconfdir)" )
+	test -f "$(DESTDIR)$(sysconfdir)/eash_config" || ( cp eash_config "$(DESTDIR)$(sysconfdir)/eash_config" && chmod 400 "$(DESTDIR)$(sysconfdir)/eash_config" )
+	test -f "$(DESTDIR)$(sysconfdir)/easd_config" || ( cp easd_config "$(DESTDIR)$(sysconfdir)/easd_config" && chmod 400 "$(DESTDIR)$(sysconfdir)/easd_config" )
+	test -d "$(DESTDIR)$(CA_DIR)" || ( mkdir -p "$(DESTDIR)$(CA_DIR)" && chmod 700 "$(DESTDIR)$(CA_DIR)" )
+	test -f "$(DESTDIR)$(CA_DIR)/root.pem" || ( cp root.pem "$(DESTDIR)$(CA_DIR)/root.pem" && chmod 400 "$(DESTDIR)$(CA_DIR)/root.pem" )
+	test -f "$(DESTDIR)$(CA_DIR)/client.pem" || ( cp client.pem "$(DESTDIR)$(CA_DIR)/client.pem" && chmod 400 "$(DESTDIR)$(CA_DIR)/client.pem" )
+	test -f "$(DESTDIR)$(CA_DIR)/server.pem" || ( cp server.pem "$(DESTDIR)$(CA_DIR)/server.pem" && chmod 400 "$(DESTDIR)$(CA_DIR)/server.pem" )
 	echo $(CA_DIR)
-	test -d "$(sysconfdir)/css" || ( mkdir -p "$(DESTDIR)$(sysconfdir)/css" && chmod 700 "$(DESTDIR)$(sysconfdir)/css" )
-	test -f "$(sysconfdir)/css/report.css" || ( cp report.css "$(DESTDIR)$(sysconfdir)/css/report.css" && chmod 400 "$(DESTDIR)$(sysconfdir)/css/report.css" )
-	test -f "$(sysconfdir)/css/detailed.css" || ( cp detailed.css "$(DESTDIR)$(sysconfdir)/css/detailed.css" && chmod 400 "$(DESTDIR)$(sysconfdir)/css/detailed.css" )
+	test -d "$(DESTDIR)$(sysconfdir)/css" || ( mkdir -p "$(DESTDIR)$(sysconfdir)/css" && chmod 700 "$(DESTDIR)$(sysconfdir)/css" )
+	test -f "$(DESTDIR)$(sysconfdir)/css/report.css" || ( cp report.css "$(DESTDIR)$(sysconfdir)/css/report.css" && chmod 400 "$(DESTDIR)$(sysconfdir)/css/report.css" )
+	test -f "$(DESTDIR)$(sysconfdir)/css/detailed.css" || ( cp detailed.css "$(DESTDIR)$(sysconfdir)/css/detailed.css" && chmod 400 "$(DESTDIR)$(sysconfdir)/css/detailed.css" )
 
 config-perms:
-	test -f "$(bindir)/eash" && ( chown 0:0 "$(bindir)/eash" && chmod 4555 "$(bindir)/eash" )
-	test -f "$(bindir)/eas_test_pty" && ( chown 0:0 "$(bindir)/eas_test_pty" && chmod 4555 "$(bindir)/eas_test_pty" )
+	test -f "$(DESTDIR)$(bindir)/eash" && ( chmod 4555 "$(DESTDIR)$(bindir)/eash" )
+	test -f "$(DESTDIR)$(bindir)/eas_test_pty" && ( chmod 4555 "$(DESTDIR)$(bindir)/eas_test_pty" )
 
-	test -f "$(sbindir)/easd" && ( chown 0:0 "$(sbindir)/easd" && chmod 500 "$(sbindir)/easd" )
-	test -f "$(sbindir)/eas_dbtool" && ( chown 0:0 "$(sbindir)/eas_dbtool" && chmod 500 "$(sbindir)/eas_dbtool" )
-	test -f "$(sbindir)/eas_replay" && ( chown 0:0 "$(sbindir)/eas_replay" && chmod 500 "$(sbindir)/eas_replay" )
-	test -f "$(sbindir)/eas_report" && ( chown 0:0 "$(sbindir)/eas_report" && chmod 500 "$(sbindir)/eas_report" )
+	test -f "$(DESTDIR)$(sbindir)/easd" && ( chmod 500 "$(DESTDIR)$(sbindir)/easd" )
+	test -f "$(DESTDIR)$(sbindir)/eas_dbtool" && ( chmod 500 "$(DESTDIR)$(sbindir)/eas_dbtool" )
+	test -f "$(DESTDIR)$(sbindir)/eas_replay" && ( chmod 500 "$(DESTDIR)$(sbindir)/eas_replay" )
+	test -f "$(DESTDIR)$(sbindir)/eas_report" && ( chmod 500 "$(DESTDIR)$(sbindir)/eas_report" )
 
 install: install-am config-setup config-perms
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
