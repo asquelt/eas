@@ -1,0 +1,95 @@
+#!/bin/sh
+#
+# easd:     Enterprise Audit Shell Server
+# chkconfig:    345 99 11
+# description:  Enterprise Audit Shell Server, which logs sessions from eash
+
+SERVICE=easd
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+. /etc/sysconfig/network
+
+[ ${NETWORKING} = "no" ] && exit 0
+
+if [ -r /etc/sysconfig/$SERVICE ]
+then . /etc/sysconfig/$SERVICE
+fi
+
+check_eashd() {
+    eashd_pid=/var/run/eashd/eashd.pid
+    eashd_monit=/etc/monit.d/eashd.conf
+    if [ -f $eashd_monit ] ; then
+        for i in $(seq 15) ; do
+            if [ ! -f $eashd_pid ] ; then
+                sleep 1 # wait for monit to spawn it's child
+            fi
+        done
+        procpid=$(cat $eashd_pid)
+        if [ ! -z "$procpid" ] && kill -0 $procpid ; then
+            if lsof -p $procpid -P -n | grep -q ':5554 .*LISTEN'; then
+                echo "Ruby eashd is running, legacy easd service should not be ran."
+                exit 0
+            else
+                echo "eashd running on non-default port, continuing"
+            fi
+        fi
+    fi
+}
+
+start()
+{
+    echo -n $"Starting $SERVICE: "
+    daemon $SERVICE $WPAARGS
+    RETVAL=$?
+
+    if [ $RETVAL -eq 0 ]
+    then
+        touch /var/lock/subsys/$SERVICE
+    fi
+    echo
+    return $RETVAL
+}
+
+stop()
+{
+    echo -n $"Shutting down $SERVICE: "
+    killproc $SERVICE
+    RETVAL=$?
+
+    if [ $RETVAL -eq 0 ]
+    then
+        rm -f  /var/lock/subsys/$SERVICE
+    fi
+    echo
+    return $RETVAL
+}
+
+# See how we were called.
+case "$1" in
+  start)
+    check_eashd
+    start
+        ;;
+  stop)
+    stop
+        ;;
+  restart|reload)
+    stop
+    check_eashd
+    start
+    ;;
+  condrestart)
+    [ -e /var/lock/subsys/$SERVICE ] && (stop; check_eashd; start)
+    ;;
+  status)
+    check_eashd
+    status $SERVICE
+    ;;
+  *)
+        gprintf "Usage: %s {start|stop|restart|reload|condrestart|status}\n" "$0"
+        exit 1
+esac
+
+exit $?
