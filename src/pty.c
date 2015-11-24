@@ -452,8 +452,8 @@ int main(int argc, char **argv, char *envp[])
           )
         {
             char *av[6];
-            av[0] = "/bin/sh";
-            av[1] = "-sh";
+            av[0] = "/bin/bash";
+            av[1] = "-bash";
             av[2] = "-c";
             av[3] = command;
             av[4] = 0;
@@ -555,8 +555,8 @@ int main(int argc, char **argv, char *envp[])
 			{
 				char *av[5];
 
-				av[0] = "/bin/sh";
-				av[1] = "-sh";
+				av[0] = "/bin/bash";
+				av[1] = "-bash";
 				av[2] = "-c";
 				av[3] = command;
 				av[4] = 0;
@@ -581,8 +581,8 @@ int main(int argc, char **argv, char *envp[])
                                         av[1] = newarg; /* basename of the shell of the real uid prepended with a single - */
                                         av[2] = 0;
                                 } else {
-                                        av[0] = "/bin/sh";
-                                        av[1] = "-sh";
+                                        av[0] = "/bin/bash";
+                                        av[1] = "-bash";
                                         av[2] = "-c";
                                         av[3] = cid.shell; /* shell of real uid */
                                         av[4] = newarg; /* basename of the shell of the real uid prepended with a single - */
