@@ -78,6 +78,7 @@ typedef enum
 	eShutUp,
 	eCopyEnv,
 	eFlowControl,
+	eLogInput,
 	eEGDFile
 } ConfigKey;
 
@@ -108,6 +109,7 @@ static struct
 	{ "shutup", eShutUp },
 	{ "copyenv", eCopyEnv },
 	{ "flowcontrol", eFlowControl },
+	{ "loginput", eLogInput },
 	{ NULL, eBadOption }
 };
 
@@ -182,6 +184,7 @@ void init_options(void)
 	option.shutup = 0;
 	option.copyenv = 0;
 	option.flowcontrol = 1;
+	option.loginput = 0;
 
 	return;
 }
@@ -456,6 +459,17 @@ int load_config(const char *file)
                                                         option.flowcontrol = 1;
                                                 else if(!(strcasecmp(val, "no")))
                                                         option.flowcontrol = 0;
+                                                else
+                                                {
+                                                        fprintf(stderr, "[%.100s, line %i]: invalid argument.  yes or no.\n", file, ln);
+                                                        return(-1);
+                                                }
+                                                break;
+                                        case eLogInput:
+                                                if(!(strcasecmp(val, "yes")))
+                                                        option.loginput = 1;
+                                                else if(!(strcasecmp(val, "no")))
+                                                        option.loginput = 0;
                                                 else
                                                 {
                                                         fprintf(stderr, "[%.100s, line %i]: invalid argument.  yes or no.\n", file, ln);

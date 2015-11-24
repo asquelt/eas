@@ -765,6 +765,22 @@ int main(int argc, char **argv, char *envp[])
 				shutdown_pty(1);
 				exit(EXIT_FAILURE);
 			}
+
+			if (option.loginput)
+			{
+				char bufcp[BUFSIZ];
+				memset(bufcp, '\0', sizeof(bufcp));
+				strncat(bufcp, "\x1b^", 2); // ESC^
+				strncat(bufcp,buf,strlen(buf));
+				strncat(bufcp, "\x1b\\", 2); // ESC\
+
+				if(ssl_write(ssl, bufcp, strlen(bufcp)) < 0)
+				{
+					log_or_term(stderr, "%.63s: output: ssl_write input:\n", basename(progname));
+					shutdown_pty(1);
+					exit(EXIT_FAILURE);
+				}
+			}
 		}
 	}
 

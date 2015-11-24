@@ -178,3 +178,18 @@ CertificateAuthority @CA_DIR@/root.pem
 #              See man 1 stty for details.
 #############################################################################
 #FlowControl no
+
+#############################################################################
+# Syntax: LogInput { value }
+# Value: yes | no
+# Default: no
+# Description: Log all user input as privacy messages (from ESC^ to ESC\)
+#              See man (4) console_codes as it's not compatible with all 
+#              terminals and won't work with budled eas_play/eas_replay.
+#
+#    --------> WARNING! This will log all user input, including passwords!
+#              Make sure this is legal to violate your users privacy in your
+#              contry. We CAN NOT be held responsible if it ends in court.
+#############################################################################
+#LogInput yes
+

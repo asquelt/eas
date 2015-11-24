@@ -11,6 +11,7 @@ struct ClientOption
 	char *shutup;
 	char *copyenv;
 	char *flowcontrol;
+	char *loginput;
 	int port;
 	int banner_pause;
 	int facility;
