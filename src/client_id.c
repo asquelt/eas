@@ -147,12 +147,46 @@ int get_client_id(struct client_id *c)
 		strncpy(c->original_gr_name, gr->gr_name, sizeof(c->original_pw_name) - 1);
 	}
 
+	/* if ssh environment is available put it alongside with terminal file name */
+
+	char *remote_ip;
+	char *remote_port;
+	char remote[BUFSIZ];
+	char remote_inspect[BUFSIZ];
+
+	memset(remote, '\0', sizeof(remote));
+	memset(remote_inspect, '\0', sizeof(remote_inspect));
+
+	if(getenv("SSH_CONNECTION")) /* src_ip src_port dst_ip dst_port */
+	{
+		strncpy(remote_inspect, getenv("SSH_CONNECTION"), sizeof(remote_inspect) - 1);
+	}
+	else if(getenv("SSH_CLIENT")) /* src_ip src_port dst_port */
+	{
+		strncpy(remote_inspect, getenv("SSH_CLIENT"), sizeof(remote_inspect) - 1);
+	}
+	
+        if(remote_inspect != (char *) 0) /* split */
+	{
+		remote_ip = strtok(remote_inspect," ");
+		remote_port = strtok(NULL," ");
+	}
+
+        if((remote_ip != (char *) 0)&&(remote_port != (char *) 0)) /* parse */
+	{
+		snprintf(remote, sizeof(remote) - 1, "%.38s [ssh from %.45s:%.5s]", c->terminal, remote_ip, remote_port);
+	}
+	else
+	{
+		strncpy(remote, c->terminal, sizeof(remote) - 1);
+	}
+
 	snprintf(c->user_string, sizeof(c->user_string) - 1, "USER\a%.63s\a%i\a%.63s\a%i\a%.63s\a%i\a%.63s\a%i\a%.63s\a%i\a%.63s\a%i\a%.100s\n",
 		c->original_pw_name, c->original_uid,
 		c->original_gr_name, c->original_gid,
 		c->real_pw_name, c->real_uid, c->real_gr_name, c->real_gid,
 		c->effective_pw_name, c->effective_uid, c->effective_gr_name, c->effective_gid,
-		c->terminal);
+		remote);
 
 	return(0);
 }
