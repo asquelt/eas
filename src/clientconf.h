@@ -9,6 +9,7 @@ struct ClientOption
 	char *default_shell;
 	char *banner;
 	char *shutup;
+	char *copyenv;
 	int port;
 	int banner_pause;
 	int facility;

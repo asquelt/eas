@@ -160,3 +160,12 @@ CertificateAuthority @CA_DIR@/root.pem
 #              unless there is some error)
 #############################################################################
 #ShutUp yes
+
+#############################################################################
+# Syntax: CopyEnv { value }
+# Value: yes | no
+# Default: no
+# Description: Specify whether eash should copy ENVIRONMENT from its parent
+#              shell (ie. sshd). Default behaviour is no.
+#############################################################################
+#CopyEnv yes

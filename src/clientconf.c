@@ -76,6 +76,7 @@ typedef enum
 	eBannerFile,
 	eBannerPause,
 	eShutUp,
+	eCopyEnv,
 	eEGDFile
 } ConfigKey;
 
@@ -104,6 +105,7 @@ static struct
 	{ "bannerfile", eBannerFile },
 	{ "bannerpause", eBannerPause },
 	{ "shutup", eShutUp },
+	{ "copyenv", eCopyEnv },
 	{ NULL, eBadOption }
 };
 
@@ -176,6 +178,7 @@ void init_options(void)
 	option.banner = 0;
 	option.tcptimeout = 2;
 	option.shutup = 0;
+	option.copyenv = 0;
 
 	return;
 }
@@ -428,6 +431,17 @@ int load_config(const char *file)
                                                         option.shutup = 1;
                                                 else if(!(strcasecmp(val, "no")))
                                                         option.shutup = 0;
+                                                else
+                                                {
+                                                        fprintf(stderr, "[%.100s, line %i]: invalid argument.  yes or no.\n", file, ln);
+                                                        return(-1);
+                                                }
+                                                break;
+                                        case eCopyEnv:
+                                                if(!(strcasecmp(val, "yes")))
+                                                        option.copyenv = 1;
+                                                else if(!(strcasecmp(val, "no")))
+                                                        option.copyenv = 0;
                                                 else
                                                 {
                                                         fprintf(stderr, "[%.100s, line %i]: invalid argument.  yes or no.\n", file, ln);

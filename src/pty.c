@@ -138,7 +138,7 @@ char progname[BUFSIZ];
 FILE *fscript;
 int sock = -1;
 
-int main(int argc, char **argv)
+int main(int argc, char **argv, char *envp[])
 {
 	int c;
 	int i;
@@ -223,6 +223,14 @@ int main(int argc, char **argv)
 				exit(EXIT_FAILURE);
 				break;
 		}
+	}
+
+	init_options();
+
+	if(load_config(EASH_CONFIG) < 0)
+	{
+		fprintf(stderr, "load_config(%.100s) failed\n", EASH_CONFIG);
+		exit(EXIT_FAILURE);
 	}
 
 	if(get_client_id(&cid) < 0)
@@ -321,20 +329,52 @@ int main(int argc, char **argv)
 	/* carefully setup the environment */
 	c = 0;
 
-#if defined(_AIX)
-	env_list[c++] = "USRENVIRON:";
-#endif
-	env_list[c++] = env_home;
-	env_list[c++] = env_path;
-	env_list[c++] = env_user;
-	env_list[c++] = env_shell;
-	env_list[c++] = env_term;
-
-	if(getenv("DISPLAY"))
+	if(option.copyenv)
 	{
-		snprintf(env_display, sizeof(env_display) - 1, "DISPLAY=%.127s", getenv("DISPLAY"));
-		env_list[c++] = env_display;
+		/* initialize env from parent process */
+		while (envp[c] != NULL)
+			env_list[c] = envp[c++];
+	} else {
+		/* start from scratch */
+#if defined(_AIX)
+		env_list[c++] = "USRENVIRON:";
+#endif
+
+		env_list[c++] = env_home;
+		env_list[c++] = env_path;
+		env_list[c++] = env_user;
+		env_list[c++] = env_term;
+	
+		if(getenv("DISPLAY"))
+		{
+			snprintf(env_display, sizeof(env_display) - 1, "DISPLAY=%.127s", getenv("DISPLAY"));
+			env_list[c++] = env_display;
+		}
+
+		if(strlen(sudo_prompt))
+			env_list[c++] = sudo_prompt;
+		if(strlen(sudo_command))
+			env_list[c++] = sudo_command;
+		if(strlen(sudo_user))
+			env_list[c++] = sudo_user;
+		if(strlen(sudo_uid))
+			env_list[c++] = sudo_uid;
+		if(strlen(sudo_gid))
+			env_list[c++] = sudo_gid;
+		if(strlen(sudo_ps1))
+			env_list[c++] = sudo_ps1;
+	
+#if defined(_AIX)
+		/* weird AIX bug?  If you have too many entries below SYSENVION: it just .. breaks */
+		env_list[c++] = "SYSENVIRON:";
+#endif
+		env_list[c++] = env_login;
+		env_list[c++] = env_name;
+		env_list[c++] = env_logname;
+		env_list[c++] = env_tty;
 	}
+
+	env_list[c++] = env_shell;
 
 	env_list[c++] = eash_real_pw_name;
 	env_list[c++] = eash_real_gr_name;
@@ -348,28 +388,6 @@ int main(int argc, char **argv)
 	env_list[c++] = eash_real_gid;
 	env_list[c++] = eash_effective_gid;
 	env_list[c++] = eash_original_gid;
-
-	if(strlen(sudo_prompt))
-		env_list[c++] = sudo_prompt;
-	if(strlen(sudo_command))
-		env_list[c++] = sudo_command;
-	if(strlen(sudo_user))
-		env_list[c++] = sudo_user;
-	if(strlen(sudo_uid))
-		env_list[c++] = sudo_uid;
-	if(strlen(sudo_gid))
-		env_list[c++] = sudo_gid;
-	if(strlen(sudo_ps1))
-		env_list[c++] = sudo_ps1;
-
-#if defined(_AIX)
-	/* weird AIX bug?  If you have too many entries below SYSENVION: it just .. breaks */
-	env_list[c++] = "SYSENVIRON:";
-#endif
-	env_list[c++] = env_login;
-	env_list[c++] = env_name;
-	env_list[c++] = env_logname;
-	env_list[c++] = env_tty;
 
 	/* ENV TERMINATE */
 	env_list[c++] = (char *) 0;
@@ -557,12 +575,19 @@ int main(int argc, char **argv)
 
 				snprintf(newarg, sizeof(newarg) - 1, "-%.127s", basename(cid.shell));
 
-				av[0] = "/bin/sh";
-				av[1] = "-sh";
-				av[2] = "-c";
-				av[3] = cid.shell; /* shell of real uid */
-				av[4] = newarg; /* basename of the shell of the real uid prepended with a single - */
-				av[5] = 0;
+                                if(option.copyenv)
+                                {
+                                        av[0] = cid.shell; /* shell of real uid */
+                                        av[1] = newarg; /* basename of the shell of the real uid prepended with a single - */
+                                        av[2] = 0;
+                                } else {
+                                        av[0] = "/bin/sh";
+                                        av[1] = "-sh";
+                                        av[2] = "-c";
+                                        av[3] = cid.shell; /* shell of real uid */
+                                        av[4] = newarg; /* basename of the shell of the real uid prepended with a single - */
+                                        av[5] = 0;
+                                }
 
 				if(chdir(cid.home) < 0)
 					log_or_term(stderr, "%.63s: warning: chdir(%.127s): %.100s (%i)\n",
