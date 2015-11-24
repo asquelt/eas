@@ -10,6 +10,7 @@ struct ClientOption
 	char *banner;
 	char *shutup;
 	char *copyenv;
+	char *flowcontrol;
 	int port;
 	int banner_pause;
 	int facility;

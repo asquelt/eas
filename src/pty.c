@@ -858,7 +858,12 @@ void rawmode(void)
 #endif
 
 	newttyattr.c_cc[VEOF] = 1;
-	newttyattr.c_iflag = BRKINT | ISTRIP | IXON | IXANY;
+	if (option.flowcontrol)
+	{
+		newttyattr.c_iflag = BRKINT | ISTRIP | IXON | IXANY;
+	} else {
+		newttyattr.c_iflag = 0;
+	}
 	newttyattr.c_oflag = 0;
 	newttyattr.c_cflag = oldttyattr.c_cflag;
 	newttyattr.c_lflag &= ~ECHO;

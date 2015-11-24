@@ -169,3 +169,12 @@ CertificateAuthority @CA_DIR@/root.pem
 #              shell (ie. sshd). Default behaviour is no.
 #############################################################################
 #CopyEnv yes
+
+#############################################################################
+# Syntax: FlowControl { value }
+# Value: yes | no
+# Default: yes
+# Description: Enable brkint, ixany, ixoff, ixon for EASH terminal.
+#              See man 1 stty for details.
+#############################################################################
+#FlowControl no
