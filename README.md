@@ -17,7 +17,7 @@ Originally by Douglas Richard Hanks, Jr. &lt;dhanks@gmail.com>, based on sudosh.
 
 ## TODO
 
-* migrate to (asciinema)[https://asciinema.org/] file format
+* migrate to [asciinema](https://asciinema.org/) file format
 * rewrite in golang
 * allow other database outputs (ie. mysql)
 
