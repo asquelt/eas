@@ -331,6 +331,8 @@ int main(int argc, char **argv)
 	char *ip = (char *) 0;
 	char *from = (char *) 0;
 	char *to = (char *) 0;
+	char *filename = (char *) 0;
+	char *hash = (char *) 0;
 	sqlite3 *db;
 	sqlite3_stmt *statement;
 
@@ -348,7 +350,7 @@ int main(int argc, char **argv)
 	speed = 1.0;
 	maxwait = 0;
 
-	while((c = getopt(argc, argv, "ad:f:g?hi:l:nt:srw:vV")) != EOF)
+	while((c = getopt(argc, argv, "ad:f:F:H:g?hi:l:nt:srw:vV")) != EOF)
 	{
 		switch(c)
 		{
@@ -383,6 +385,8 @@ int main(int argc, char **argv)
 				fprintf(stdout, " -t\tlimit records by the 'To' field.  E.g. `%.63s -t root'\n", basename(progname));
 				fprintf(stdout, " -r\treverse sort.\n");
 				fprintf(stdout, " -w\tset the maximum amount of time you wish to wait.\n");
+				fprintf(stdout, " -F\treplay from file (skip database lookup).\n");
+				fprintf(stdout, " -H\twhen replaying from file provide a hash for verification.\n");
 				fprintf(stdout, " -v\tdisplay version information.\n");
 				exit(EXIT_SUCCESS);
 				break;
@@ -404,6 +408,12 @@ int main(int argc, char **argv)
 			case 'w':
 				sscanf(optarg, "%lf", &maxwait);
 				break;
+			case 'F':
+				filename = strdup(optarg);
+				break;
+			case 'H':
+				hash = strdup(optarg);
+				break;
 			case 'v':
 			case 'V':
 				print_version(&option, *argv);
@@ -418,6 +428,13 @@ int main(int argc, char **argv)
 
 	argc -= optind;
 	argv += optind;
+
+	/* if we have filename and hash, let's replay directly from it */
+	if (filename != (char *) 0 && hash != (char *) 0)
+	{
+		return playback(filename,hash);
+		exit(EXIT_SUCCESS);
+	}
 
 	/* if we still have an arguement go ahead and convert it to a long and replay the session */
 	if(*argv != (char *) 0)
