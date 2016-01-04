@@ -1600,16 +1600,16 @@ associated with that instance of easd.
 #### 5.2.1 SIGHUP
 If you wish to restart the EAS Server, for example after making changes to the configuration file
 /etc/eas/easd_config, execute the command:
-# kill
-
-1 `cat /var/run/easd.pid`
+```
+# kill -HUP `cat /var/run/easd.pid`
+```
 
 #### 5.2.2 SIGUSR1
 If you wish to change the current LogLevel of the running EAS Server easd for debugging purposes execute
 the command:
-# kill
-
-10 `cat /var/run/easd.pid`
+```
+# kill -USR1 `cat /var/run/easd.pid`
+```
 
 Each time you send the signal SIGUSR1(10) to the EAS Server easd the LogLevel will change in a roundrobin fasion.
 Old LogLevel
