@@ -31,7 +31,7 @@ effective fashion.
 If the bug is obvious, critical, or affects a lot of users, the bug will be corrected immediately. It could also
 happen that we will tell you to update to a newer version to see if the bug happens there.
 
-### 3.1 Identifying Bugs
+### 3.1 Identifying Bugs
 Before you report a bug, please read and re-read the documentation to verify that you can really reproduce
 the problem. If it is not clear in the documentation whether you can do something or not, please report that
 too; it is a bug in the documentation. If it turns out that the program does something different from what the
@@ -82,7 +82,7 @@ information. In most cases it is sufficient to report the vendor and version.
 Do not be afraid if your bug report becomes rather lengthy. That is a fact of life. It is better to report
 everything the first time than have us squeeze the facts out of you.
 
-## Chapter 1. Installation Instructions
+## Chapter 1. Installation Instructions
 
 ### 1.1 Short Version
 #### 1.1.1 AIX
@@ -121,7 +121,7 @@ EAS has been certified to work on the platforms listed below.
 * Mac OS X
 * Solaris
 
-## Chapter 2. EAS Server Configuration
+## Chapter 2. EAS Server Configuration
 
 The EAS Server is configured through the /etc/eas/easd_config configuration file. The configuration file
 should be owned by root with permissions of 0400. The strict permissions ensure that the configuration files
@@ -164,7 +164,7 @@ packets to the client.
 KeepAlive yes
 ```
 
-### 2.3 NotificationHook
+### 2.3 NotificationHook
 This option allows the system administrator to install a notification hook in the EAS Server. Upon a
 successful authentication the NotificationHook will be called and the return code evaluated.
 The NotificationHook can be a script or an executable. The NotificationHook will be forked into the
@@ -264,21 +264,20 @@ exit 0
 #
 #############################################################################
 #NotificationHook /usr/libexec/custom_notification_script
+```
 
-Figure 3 - EAS Server Configuration: NotificationHook
 The notification hook can be used to provide additional authentication. For example the script called by
 NotificationHook could query an external database or authentication source using the provided environment
 variables. If the NotificationHook script returns a non-zero return code the requesting client will be denied
 access. If the return code is zero the client is granted access.
 
-15
-
-2.4 HookFailureCritical
+### 2.4 HookFailureCritical
 This option can be used to over-ride the default behavior of NotificationHook. The default behavior is to
 deny the client access if the return code from NotificationHook is non-zero. Setting the option
 HookFailureCritical to “no” will always grant the client access regardless of the NotificationHook return
 code.
 Format:
+```
 #############################################################################
 # Usage: HookFailureCritical { value }
 # Value: yes | no
@@ -290,12 +289,12 @@ code of non-zero OR if the executable specified by
 NotificationHook fails - EAS will terminate the session.
 #############################################################################
 #HookFailureCritical yes
+```
 
-Figure 4 - EAS Server Configuration: HookFailureCritical
-
-2.5 HookTimeout
+### 2.5 HookTimeout
 This option is used to set the timeout of NotificationHook. Upon timeout the client is denied access. The
 default value is 5. The value specified is in seconds.
+```
 #############################################################################
 # Usage: HookTimeout { value }
 # Value: integer
@@ -306,8 +305,6 @@ Value is in seconds. Legal values are 1 - 65536.
 #############################################################################
 #HookTimeout 5
 ```
-
-## Chapter 2. EAS Server Configuration
 
 ### 2.6 Digital Signatures
 These options have been placed together under the umbrella “Digital Signatures.” Digital Signatures are
@@ -345,7 +342,7 @@ strict when it comes to disaster recovery. If you need to copy the audit logs an
 server, both the file’s mtime and ctime will be changed upon the file transfer, thus invalidating the digital
 signature.
 
-Format:
+Format:
 ```
 #############################################################################
 # Section: Digital Signatures
@@ -366,28 +363,18 @@ signature.
 #############################################################################
 # Description: This option will add the file's inode to the SHA1 signature.
 #
-# Special:
-Once these options are set, previous audit logs are subject
+# Special: Once these options are set, previous audit logs are subject
+# to the terms of the strictness. For example if you disable
+# this option all previous audit logs using this option will
+# not be verifiable through EAS Replay.
 #
-to the terms of the strictness. For example if you disable
+# You must have a standard with these options and not change it
+# mid-stream.
 #
-this option all previous audit logs using this option will
-#
-not be verifiable through EAS Replay.
-#
-#
-You must have a standard with these options and not change it
-#
-mid-stream.
-#
-# Note:
-It's highly recommended that the default values be not be
-#
-changed. The default values represent high security and
-#
-integrity with the trade-off of being able to copy the audit
-#
-logs to a different log server.
+# Note: It's highly recommended that the default values be not be
+# changed. The default values represent high security and
+# integrity with the trade-off of being able to copy the audit
+# logs to a different log server.
 #
 # Option
 SignMode
@@ -501,9 +488,7 @@ Table 5 - SessionDirectory Layout
 
 Figure 10 - Example 2 Session Directory Layout
 
-19
-
-2.9 User
+### 2.9 User
 As with any other server daemon that is connected to the world at large, it is advisable to run EAS under a
 separate user account. This user account should only own the data itself that is being managed by the server,
 and should not be shared with other daemons. (Thus using the user “nobody” is a bad idea.)
@@ -513,6 +498,7 @@ used but by no means required.
 Use this option to specify the username or UNIX UID the EAS Daemon (easd) should run as. Please note
 that the UNIX GID will be the default GID of the UID provided as described by /etc/passwd.
 Format:
+```
 #############################################################################
 # Usage: User { value }
 # Value: string | integer
@@ -547,17 +533,13 @@ Disabling StrictSignatures increases the risk for
 manipulating audit logs.
 #############################################################################
 User 0
+```
 
-Figure 11 - EAS Server Configuration: User
-
-20
-
-Chapter 2. EAS Server Configuration
-
-2.10 IdleTimeout
+### 2.10 IdleTimeout
 Use this option to specify the shell timeout in seconds. The shell idle time is increased when both no input or
 output is received. When the shell idle time reaches the defiled IdleTimeout, the client will be disconnected
 and the idle timeout will be logged.
+```
 #############################################################################
 # Syntax: IdleTimeout { value }
 # Value: integer
@@ -571,10 +553,9 @@ terminate the connection. A value of -1 will disable the
 idle timeout. Default value of 7200 seconds (2 hours)
 #############################################################################
 IdleTimeout 7200
+```
 
-Figure 12 - EAS Server Configuration: IdleTimeout
-
-2.11 Sync
+### 2.11 Sync
 Use this option to adjust the way the EAS Daemon (easd) writes to disk. The default is Unbuffered /
 asynchronous due to performance considerations. Please note that Sync needs to be set to “_IOFBF” if you
 wish to be able to “snoop” upon running audit logs. When Sync is set to “_IOFBF” serious performance
@@ -594,7 +575,7 @@ recommended and will cause performance problems. The
 catch is that if you want to “snoop” on running audit logs,
 this option needs to be enabled.
 
-Table 6 - Synchronization Options
+```
 #############################################################################
 # Usage: Sync { value }
 # Value: _IONBF | _IOLBF | _IOFBF
@@ -619,12 +600,9 @@ It's recommended that you leave buffering turned off for
 performance reasons. _IONBF is the default setting.
 #############################################################################
 #Sync _IONBF
+```
 
-Figure 13 - EAS Server Configuration: Sync
-
-21
-
-2.12 SyslogFacility
+### 2.12 SyslogFacility
 Specify the default syslog facility that EAS Daemon (easd) should write logs to. The default is LOG_AUTH.
 SyslogFacility
 LOG_AUTH
@@ -654,8 +632,8 @@ Generally reserved for syslogd.
 Generic user-level messages.
 UUCP.
 
-Table 7 - Syslog Facilities
 Format:
+```
 #############################################################################
 # Section: Syslog Configuration
 #############################################################################
@@ -690,14 +668,9 @@ default genertic user-level messages
 UUCP
 #############################################################################
 SyslogFacility LOG_AUTH
+```
 
-Figure 14 - EAS Server Configuration: SyslogFacility
-
-22
-
-Chapter 2. EAS Server Configuration
-
-2.13 SyslogPriority
+### 2.13 SyslogPriority
 Specify the default syslog priority that EAS Daemon (easd) should write logs to. The default is LOG_INFO.
 Priority
 LOG_EMERG
@@ -719,7 +692,6 @@ Normal, but significant conditions.
 Information messages (DEFAULT).
 Debug-level messages.
 
-Table 8 - Syslog Priorities
 Please note that EAS Daemon (easd) will always use the following priorities under the following conditions:
 Priority
 LOG_CRIT
@@ -733,8 +705,8 @@ When an error has occurred.
 When the LogLevel is set to any of the DEBUG levels.
 All other messages.
 
-Table 9 - Syslog Priorities and Conditions
 Format:
+```
 #############################################################################
 # Syntax: SyslogPriority { value }
 # Value: string
@@ -771,12 +743,9 @@ LOG_DEBUG when the LogLevel is set to DEBUG[123]
 Otherwise the default SyslogPriority will be used.
 #############################################################################
 SyslogPriority LOG_INFO
+```
 
-Figure 15 - EAS Server Configuration: SyslogPriority
-
-23
-
-2.14 LogLevel
+### 2.14 LogLevel
 Specify the level of output you wish to receive from the EAS Daemon (easd).
 LogLevel
 INFO
@@ -791,8 +760,8 @@ Debug level 2 – logs function calls
 Debug level 3 – logs everything (warning: a lot of output
 will be generated)
 
-Table 10 - EAS Daemon LogLevels
 Format:
+```
 #############################################################################
 # Syntax: LogLevel { value }
 # Value: string
@@ -812,14 +781,9 @@ debug level 3 (LOG_DEBUG) - (warning) logs all function calls
 and data
 #############################################################################
 LogLevel INFO
+```
 
-Figure 16 - EAS Server Configuration: LogLevel
-
-24
-
-Chapter 2. EAS Server Configuration
-
-2.15 Cipher
+### 2.15 Cipher
 Define permitted SSL ciphers in a colon delimited list. For a complete list see “openssl ciphers” The EAS
 default is “HIGH:MEDIUM” We suggest that this value not be changed unless you know what you’re doing.
 Cipher String
@@ -878,8 +842,8 @@ cipher suites using IDEA.
 cipher suites using MD5.
 cipher suites using SHA1.
 
-Table 11 - Server SSL Cipher Strings
 Format:
+```
 #############################################################################
 # Syntax: Cipher { value1:value2:... }
 # Value: string
@@ -889,12 +853,9 @@ Format:
 For a complete list see "openssl ciphers"
 #############################################################################
 Cipher HIGH:MEDIUM
+```
 
-Figure 17 - EAS Server Configuration: Cipher
-
-25
-
-2.16 Method
+### 2.16 Method
 Define SSL method to use. The default value is “SSLv3”. It’s recommended that this value not be changed.
 Method
 TLSv1
@@ -908,8 +869,8 @@ SSL version 2.
 SSL version 3 (DEFAULT).
 SSL version 2 and 3 compatibility mode.
 
-Table 12 - Server SSL Methods
 Format:
+```
 #############################################################################
 # Section: SSL Configuration
 #############################################################################
@@ -927,13 +888,13 @@ SSL version 3
 SSL version 2 and 3 compatibility mode
 #############################################################################
 Method SSLv3
+```
 
-Figure 18 - EAS Server Configuration: Method
-
-2.17 PrivateKey
+### 2.17 PrivateKey
 Specify private key and certificate file. The file should begin with a PEM encoded private key followed by a
 PEM encoded certificate. The PEM file can contain several certificates that you trust. Use the
 “eas_mkcerts” utility to generate the public and private keys you will need for the server and client.
+```
 #############################################################################
 # Syntax: PrivateKey { value }
 # Value: string
@@ -947,16 +908,12 @@ encoded certificate. The PEM file can contain serveral
 certificates that you trust.
 #############################################################################
 PrivateKey /etc/eas/certs/server.pem
+```
 
-Figure 19 - EAS Server Configuration: PrivateKey
-
-26
-
-Chapter 2. EAS Server Configuration
-
-2.18 CertificateAuthority
+### 2.18 CertificateAuthority
 Specify certificate authority file. If you want to trust additional certificates, append them to the file. By
 default the certificates in the PrivateKey are trusted.
+```
 #############################################################################
 # Syntax: CertificateAuthority { value }
 # Value: string
@@ -968,13 +925,13 @@ additional certificates, append them to the file. By
 default the certificates in in the PrivateKey are trusted.
 #############################################################################
 CertificateAuthority /etc/eas/certs/root.pem
+```
 
-Figure 20 - EAS Server Configuration: CertificateAuthority
-
-2.19 RandomFile
+### 2.19 RandomFile
 If your operating system requires that you specify more random data to feed SSL, use the RandomFile option.
 The file specified by RandomFile will be read for entropy – the most obvious choice is /dev/urandom. By
 default this option isn’t required.
+```
 #############################################################################
 # Syntax: RandomFile { value }
 # Value: string
@@ -984,13 +941,13 @@ default this option isn’t required.
 OpenSSL can be correctly seeded. Default is /dev/urandom
 #############################################################################
 #RandomFile /dev/urandom
+```
 
-Figure 21 - EAS Server Configuration: RandomFile
-
-2.20 EGDFile
+### 2.20 EGDFile
 If your operating system requires that you specify more random data to feed SSL and you do not have
 /dev/urandom to use with the RandomFile option, use the EGDfile option. The file specified by EGDFile
 should point to the UNIX socket created by EGD. By default this option isn’t required.
+```
 #############################################################################
 # Syntax: EDGFile { value }
 # Value: string
@@ -1000,12 +957,9 @@ should point to the UNIX socket created by EGD. By default this option isn’t r
 option if you don't have /dev/urandom or /dev/random
 #############################################################################
 #EGDFile /var/run/egd-pool
+```
 
-Figure 22 - EAS Server Configuration: EGDFile
-
-27
-
-Chapter 3. EAS Client Configuration
+## Chapter 3. EAS Client Configuration
 The EAS Client is configured through the /etc/eas/eash_config configuration file. The configuration file
 should be owned by root with permissions of 0400. The strict permissions ensure that the configuration files
 are not tampered with.
@@ -1025,9 +979,10 @@ Comments begin with the pound sign (#) and continue to the end of the current li
 
 Options consist of key-value pairs separated by white space.
 
-3.1 Port
+### 3.1 Port
 Use this option to specify which port EAS to use when connecting to a log server. The default is 5554.
 Format:
+```
 #############################################################################
 # Usage: Port { value }
 # Default: 5554
@@ -1035,13 +990,13 @@ Format:
 # Description: Which port to use when connecting to log server. 1 - 65536.
 #############################################################################
 Port 5554
+```
 
-Figure 23 - EAS Client Configuration: Port
-
-3.2 TCPTimeout
+### 3.2 TCPTimeout
 When connecting to a remote EAS Server you can specify the number of seconds to wait before timing out.
 The default is 2 seconds. This value is specified in number of seconds.
 Format:
+```
 #############################################################################
 # Usage: TCPTimeout { value }
 # Default: 2
@@ -1051,20 +1006,16 @@ Format:
 to the LogServer. Default is 2.
 #############################################################################
 TCPTimeout 2
+```
 
-Figure 24 - EAS Client Configuration: TCPTimeout
-
-28
-
-Chapter 3. EAS Client Configuration
-
-3.3 LogServer
+### 3.3 LogServer
 Specify the IP address or hostname of the remote EAS server. Multiple definitions can be used to create a list
 of EAS servers to be tried in the event a EAS server is unreachable. The default value is “localhost” but this
 is incorrect. You always want to specify a remote EAS server so that the audit logs are stored physically
 different location. It’s also recommended that if EAS is to be used on the EAS server, that the EAS server
 send its audit logs to a different server.
 Format:
+```
 #############################################################################
 # Usage: LogServer { value }
 # Value: string
@@ -1089,22 +1040,21 @@ LogServer localhost
 #LogServer remotehost2
 #LogServer disasterrecovery1
 #LogServer disasterrecovery2
+```
 
-Figure 25 - EAS Client Configuration: LogServer
-
-29
-
-3.4 DefaultShell
+### 3.4 DefaultShell
 Specify the default shell that is to be used when “eash” is to be used as a login shell in /etc/passwd. This
 option can be overridden with the symlink facility. To use an alternate shell create a symlink to the absolute
 path of eash.
 The format is: eash_path_to_shell
 For example if you want to use the C-shell (/bin/csh), assuming that the absolute path to eash is
 /usr/local/bin/eash create a symlink with the following command:
+```
 # ln –s /usr/local/bin/eash /usr/local/bin/eash_bin_csh
+```
 
-Figure 26 - Symlink eash to execute another shell
 Any shell can be appended – just replaced the character “_” with “/”
+```
 #############################################################################
 # Usage: DefaultShell { value }
 # Value: string
@@ -1140,16 +1090,12 @@ Note:
 All symlinks must be owned by root.
 #############################################################################
 DefaultShell /bin/sh
+```
 
-Figure 27 - EAS Client Configuration: DefaultShell
-
-30
-
-Chapter 3. EAS Client Configuration
-
-3.5 BannerFile
+### 3.5 BannerFile
 If you wish to display a message of the day or the company security policy upon each shell session use the
 BannerFile option to specify the file to display. This file must exist on each EAS client server.
+```
 #############################################################################
 # Syntax: BannerFile { value }
 # Value: string
@@ -1161,13 +1107,13 @@ before each session.
 This file must exist on each EAS client.
 #############################################################################
 #BannerFile /etc/corporate-policy
+```
 
-Figure 28 - EAS Client Configuration: Bannerfile
-
-3.6 BannerPause
+### 3.6 BannerPause
 If a banner is to be displayed with BannerFile and you wish to impose a delay before the session is started,
 use the BannerPause option. The value should be the number of seconds to pause. If the value is -1 the
 pause is disabled and the user can access the shell immediately.
+```
 #############################################################################
 # Syntax: BannerPause { value }
 # Default: -1
@@ -1177,12 +1123,9 @@ pause is disabled and the user can access the shell immediately.
 allowed to use the session. Use -1 to disable.
 #############################################################################
 BannerPause -1
+```
 
-Figure 29 - EAS Client Configuration: BannerPause
-
-31
-
-3.7 Cipher
+### 3.7 Cipher
 Define permitted SSL ciphers in a colon delimited list. For a complete list see “openssl ciphers” The EAS
 default is “HIGH:MEDIUM” We suggest that this value not be changed unless you know what you’re doing.
 Cipher String
@@ -1241,7 +1184,7 @@ cipher suites using IDEA.
 cipher suites using MD5.
 cipher suites using SHA1.
 
-Table 13 - Client SSL Cipher Strings
+```
 #############################################################################
 # Syntax: Cipher { value1:value2:... }
 # Value: string
@@ -1251,14 +1194,9 @@ Table 13 - Client SSL Cipher Strings
 For a complete list see "openssl ciphers"
 #############################################################################
 Cipher HIGH:MEDIUM
+```
 
-Figure 30 - EAS Client Configuration: Cipher
-
-32
-
-Chapter 3. EAS Client Configuration
-
-3.8 Method
+### 3.8 Method
 Define SSL method to use. The default value is “SSLv3”. It’s recommended that this value not be changed.
 Method
 TLSv1
@@ -1272,8 +1210,8 @@ SSL version 2.
 SSL version 3 (DEFAULT).
 SSL version 2 and 3 compatibility mode.
 
-Table 14 - Client SSL Methods
 Format:
+```
 #############################################################################
 # Section: SSL Configuration
 #############################################################################
@@ -1291,13 +1229,13 @@ SSL version 3
 SSL version 2 and 3 compatibility mode
 #############################################################################
 Method SSLv3
+```
 
-Figure 31 - EAS Client Configuration: Method
-
-3.9 PrivateKey
+### 3.9 PrivateKey
 Specify private key and certificate file. The file should begin with a PEM encoded private key followed by a
 PEM encoded certificate. The PEM file can contain several certificates that you trust. Use the
 “eas_mkcerts” utility to generate the public and private keys you will need for the server and client.
+```
 #############################################################################
 # Syntax: PrivateKey { value }
 # Value: string
@@ -1311,14 +1249,12 @@ encoded certificate. The PEM file can contain serveral
 certificates that you trust.
 #############################################################################
 PrivateKey /etc/eas/certs/server.pem
+```
 
-Figure 32 - EAS Client Configuration: PrivateKey
-
-33
-
-3.10 CertificateAuthority
+### 3.10 CertificateAuthority
 Specify certificate authority file. If you want to trust additional certificates, append them to the file. By
 default the certificates in the PrivateKey are trusted.
+```
 #############################################################################
 # Syntax: CertificateAuthority { value }
 # Value: string
@@ -1330,13 +1266,13 @@ additional certificates, append them to the file. By
 default the certificates in in the PrivateKey are trusted.
 #############################################################################
 CertificateAuthority /etc/eas/certs/root.pem
+```
 
-Figure 33 - EAS Client Configuration: CertificateAuthority
-
-3.11 RandomFile
+### 3.11 RandomFile
 If your operating system requires that you specify more random data to feed SSL, use the RandomFile option.
 The file specified by RandomFile will be read for entropy – the most obvious choice is /dev/urandom. By
 default this option isn’t required.
+```
 #############################################################################
 # Syntax: RandomFile { value }
 # Value: string
@@ -1346,13 +1282,13 @@ default this option isn’t required.
 OpenSSL can be correctly seeded. Default is /dev/urandom
 #############################################################################
 #RandomFile /dev/urandom
+```
 
-Figure 34 - EAS Client Configuration: RandomFile
-
-3.12 EGDFile
+### 3.12 EGDFile
 If your operating system requires that you specify more random data to feed SSL and you do not have
 /dev/urandom to use with the RandomFile option, use the EGDfile option. The file specified by EGDFile
 should point to the UNIX socket created by EGD. By default this option isn’t required.
+```
 #############################################################################
 # Syntax: EDGFile { value }
 # Value: string
@@ -1362,38 +1298,32 @@ should point to the UNIX socket created by EGD. By default this option isn’t r
 option if you don't have /dev/urandom or /dev/random
 #############################################################################
 #EGDFile /var/run/egd-pool
+```
 
-Figure 35 - EAS Client Configuration: EGDFile
-
-34
-
-Chapter 4. SSL
-
-Chapter 4. SSL
+## Chapter 4. SSL
 EAS uses SSL for both encryption and authentication. More specifically EAS uses the Public Key
 Infrastructure (PKI).
 
-4.1 Certificates
+### 4.1 Certificates
 A certificate associates a public key with the real identity of an individual, server, or other entity, known as
 the subject. Information about the subject includes identifying information (the distinguished name), and the
 public key. It has the identification and signature of the Certificate Authority which issued the certificate, and
 the period of time during which the certificate is valid. It may have additional information (or extensions) as
 well as administrative information for the Certificate Authority's use, such as a serial number.
 
-4.2 Certificate Authorities
+### 4.2 Certificate Authorities
 A Certificate Authority certificate provides assurance that the identity of the holder of the private key of a
 key-pair is really who the certificate says it is. The Certificate Authority does this by verifying the
 information in a certificate request before granting the certificate.
 
-35
-
-4.3 Generating New Certificates
+### 4.3 Generating New Certificates
 There are many options when generating new certificates. Obviously you could do this yourself or use a
 third party commercial vendor to supply and sign the certificates. The recommended method is to use
 OpenSSL itself. EAS comes with utilities to generate certificates and perform all the hard work for you.
 
-4.3.1 Extract EAS Certificate Tools
+#### 4.3.1 Extract EAS Certificate Tools
 Locate the package eas-mkcerts.tar and extract it in a secure location.
+```
 <dhanks@localhost>:~$ tar xvf eas-mkcerts.tar
 certs/
 certs/mkcerts
@@ -1412,64 +1342,31 @@ certs/conf/
 certs/conf/client.cnf
 certs/conf/root.cnf
 certs/conf/server.cnf
+```
 
-Figure 36 - Extract EAS Certificate Tools
-
-36
-
-Chapter 4. SSL
-
-4.3.2 mkcerts
+#### 4.3.2 mkcerts
 Change your directory to certs/ and execute the EAS certificate tool mkcerts
+```
 <dhanks@localhost>:~$ cd certs/
 <dhanks@localhost>:~/certs$ ./mkcerts
+```
 
-Figure 37 - Execute EAS Certificate Tool
-
-4.3.3 Create Root Certificate Authority
+#### 4.3.3 Create Root Certificate Authority
 EAS Certificate Tool will now create the Root Certificate Authority. This is a 1024-bit RSA encrypted
 private key. When prompted for a “PEM pass phrase” enter a strong password that will protect the private
 key.
-=============================================================================
-___
-_
-___
-_
-___
-_
-/ __|_ _ ___ __ _| |_ ___ | _ \___ ___| |_
-/ __| /_\
-| (__| '_/ -_) _` | _/ -_) |
-/ _ \/ _ \ _| | (__ / _ \
-\___|_| \___\__,_|\__\___| |_|_\___/\___/\__| \___/_/ \_\
-=============================================================================
+```
 Generating a 1024 bit RSA private key
 ..........................................++++++
 .++++++
 writing new private key to 'CA/private/cakey.pem'
 Enter PEM pass phrase:
 Verifying - Enter PEM pass phrase:
+```
 
-Figure 38 - Create Root Certificate Authority
-
-37
-
-4.3.4 Sign Root Certificate Authority
+#### 4.3.4 Sign Root Certificate Authority
 EAS Certificate Tool will now create a self-signed Root Certificate Authority.
-=============================================================================
-___ _
-___
-_
-___
-_
-/ __(_)__ _ _ _
-| _ \___ ___| |_
-/ __| /_\
-\__ \ / _` | ' \ |
-/ _ \/ _ \ _| | (__ / _ \
-|___/_\__, |_||_| |_|_\___/\___/\__| \___/_/ \_\
-|___/
-=============================================================================
+```
 Using configuration from conf/root.cnf
 Enter pass phrase for CA/private/cakey.pem:
 Check that the request matches the signature
@@ -1490,22 +1387,11 @@ emailAddress
 Certificate is to be certified until Oct 14 22:13:43 2008 GMT (1095 days)
 Write out database with 1 new entries
 Data Base Updated
+```
 
-Figure 39 - Sign Root Certificate Authority
-
-4.3.5 Create Client Certificate Signing Request
+#### 4.3.5 Create Client Certificate Signing Request
 EAS Certificate Tool will now create a client certificate signing request (CSR).
-=============================================================================
-___ _ _
-_
-___
-_
-/ __| (_)___ _ _| |_ | _ \___ __ _ _ _ ___ __| |_
-| (__| | / -_) ' \ _| |
-/ -_) _` | || / -_|_-< _|
-\___|_|_\___|_||_\__| |_|_\___\__, |\_,_\___/__/\__|
-|_|
-=============================================================================
+```
 Generating a 1024 bit RSA private key
 .............++++++
 ....................................................................c.............
@@ -1513,30 +1399,11 @@ Generating a 1024 bit RSA private key
 writing new private key to 'client.pem'
 Enter PEM pass phrase:
 Verifying - Enter PEM pass phrase:
------
+```
 
-Figure 40 - Create Client CSR
-
-38
-
-Chapter 4. SSL
-
-4.3.6 Sign Client Certificate Signing Request
+#### 4.3.6 Sign Client Certificate Signing Request
 EAS Certificate Tool will now sign the client certificate signing request (CSR).
-=============================================================================
-___ _
-___ _ _
-_
-___
-_
-/ __(_)__ _ _ _
-/ __| (_)___ _ _| |_ | _ \___ __ _ _ _ ___ __| |_
-\__ \ / _` | ' \ | (__| | / -_) ' \ _| |
-/ -_) _` | || / -_|_-< _|
-|___/_\__, |_||_| \___|_|_\___|_||_\__| |_|_\___\__, |\_,_\___/__/\__|
-|___/
-|_|
-=============================================================================
+```
 Using configuration from conf/root.cnf
 Enter pass phrase for CA/private/cakey.pem:
 Check that the request matches the signature
@@ -1557,66 +1424,30 @@ emailAddress
 Certificate is to be certified until Oct 15 22:13:48 2006 GMT (365 days)
 Write out database with 1 new entries
 Data Base Updated
+```
 
-Figure 41 - Sign Client CSR
-
-4.3.7 Remove Client PEM
+#### 4.3.7 Remove Client PEM
 EAS Certificate Tool will now remove the client PEM so that a password isn’t needed every time eash is
 executed.
-=============================================================================
-___
-___ ___ __ __
-| _ \___ _ __ _____ _____ | _ \ __| \/ |
-|
-/ -_) ' \/ _ \ V / -_) | _/ _|| |\/| |
-|_|_\___|_|_|_\___/\_/\___| |_| |___|_| |_|
-=============================================================================
+```
 Enter pass phrase:
 writing RSA key
+```
 
-Figure 42 - Remote Client PEM
-
-39
-
-4.3.8 Create Server Certificate Signing Request
+#### 4.3.8 Create Server Certificate Signing Request
 EAS Certificate Tool will now create a server certificate signing request (CSR).
-=============================================================================
-___
-___
-_
-/ __| ___ _ ___ _____ _ _ | _ \___ __ _ _ _ ___ __| |_
-\__ \/ -_) '_\ V / -_) '_| |
-/ -_) _` | || / -_|_-< _|
-|___/\___|_| \_/\___|_|
-|_|_\___\__, |\_,_\___/__/\__|
-|_|
-=============================================================================
+```
 Generating a 1024 bit RSA private key
 ......................................................................++++++
 ...................................++++++
 writing new private key to 'server.pem'
 Enter PEM pass phrase:
 Verifying - Enter PEM pass phrase:
------
+```
 
-Figure 43 - Create Server CSR
-
-4.3.9 Sign Server Certificate Signing Request
+#### 4.3.9 Sign Server Certificate Signing Request
 EAS Certificate Tool will now sign the server certificate signing request (CSR).
-=============================================================================
-___ _
-___
-___
-_
-/ __(_)__ _ _ _
-/ __| ___ _ ___ _____ _ _ | _ \___ __ _ _ _ ___ __| |_
-\__ \ / _` | ' \ \__ \/ -_) '_\ V / -_) '_| |
-/ -_) _` | || / -_|_-< _|
-|___/_\__, |_||_| |___/\___|_| \_/\___|_|
-|_|_\___\__, |\_,_\___/__/\__|
-|___/
-|_|
-=============================================================================
+```
 Using configuration from conf/root.cnf
 Enter pass phrase for CA/private/cakey.pem:
 Check that the request matches the signature
@@ -1637,32 +1468,20 @@ emailAddress
 Certificate is to be certified until Oct 15 22:13:53 2006 GMT (365 days)
 Write out database with 1 new entries
 Data Base Updated
+```
 
-Figure 44 - Sign Server CSR
-
-40
-
-Chapter 4. SSL
-
-4.3.10 Remove Server PEM
+#### 4.3.10 Remove Server PEM
 EAS Certificate Tool will now remove the server PEM so that a password isn’t needed every time easd is
 executed.
-=============================================================================
-___
-___ ___ __ __
-| _ \___ _ __ _____ _____ | _ \ __| \/ |
-|
-/ -_) ' \/ _ \ V / -_) | _/ _|| |\/| |
-|_|_\___|_|_|_\___/\_/\___| |_| |___|_| |_|
-=============================================================================
+```
 Enter pass phrase:
 writing RSA key
+```
 
-Figure 45 - Remove Server PEM
-
-4.4 Securing the New Certificates
+### 4.4 Securing the New Certificates
 Now that you have generated new certificates you need to configure and install them. After the generation
 you should be left with three files:
+```
 <dhanks@localhost>:~/certs$ ls -l *.pem
 -rw-r--r-1 dhanks
 dhanks
@@ -1673,15 +1492,16 @@ dhanks
 -rw-r--r-1 dhanks
 dhanks
 3861 Oct 15 15:13 server.pem
+```
 
-Figure 46 - New Certificates
 The client.pem is to be installed on any client using eash connecting to an EAS server.
 The server.pem is to be installed on the EAS Daemon easd server.
 The root.pem is to be installed on both the EAS Daemon easd and any clients using eash connecting to an
 EAS server.
 These files need to be owned by root with the permissions 400.
 
-4.4.1 chown and chmod
+#### 4.4.1 chown and chmod
+```
 <dhanks@localhost>:~/certs$ su
 Password:
 <root@localhost>:/home/dhanks/certs$ chown 0:0 *.pem
@@ -1697,13 +1517,10 @@ root
 root
 3861 Oct 15 15:13 server.pem
 <root@localhost>:/home/dhanks/certs$
+```
 
-Figure 47 - Securing the New Certificates
-
-41
-
-4.5 Installing the New Certificates
-4.5.1 client.pem
+### 4.5 Installing the New Certificates
+#### 4.5.1 client.pem
 The certificate client.pem should be installed on all EAS clients that will be connecting to the EAS server.
 Specifically any EAS clients that will be using eash should have the client.pem certificate installed.
 What
@@ -1714,9 +1531,7 @@ Value
 /etc/eas/certs/client.pem
 PublicKey /etc/eas/certs/client.pem
 
-Table 15 - Installing client.pem
-
-4.5.2 server.pem
+#### 4.5.2 server.pem
 The certificate server.pem should be installed on all EAS Daemon server. Specifically any EAS Servers that
 will be using easd should have the server.pem certificate installed.
 What
@@ -1727,9 +1542,7 @@ Value
 /etc/eas/certs/server.pem
 PublicKey /etc/eas/certs/server.pem
 
-Table 16 - Installing server.pem
-
-4.5.3 root.pem
+#### 4.5.3 root.pem
 Both EAS Clients and Servers must have the root.pem installed. Specifically any server that has EAS
 installed should have the root.pem certificate installed.
 What
@@ -1738,19 +1551,15 @@ EAS Client Configuration File /etc/eas/eash_config
 EAS Server Configuration File /etc/eas/easd_config
 Table 17 - Installing root.pem
 
-42
-
 Value
 /etc/eas/certs/root.pem
 CertificateAuthority /etc/eas/certs/root.pem
 CertificateAuthority /etc/eas/certs/root.pem
 
-Chapter 5.The EAS Server
-
-Chapter 5. The EAS Server
+## Chapter 5. The EAS Server
 The EAS Server is responsible for accepting new client requests and creating audit logs of each client session.
 
-5.1 EAS Server Command-line options
+### 5.1 EAS Server Command-line options
 The EAS Server easd only supports minimal command-line options. All of the functionality is controlled and
 configured through the configuration file /etc/eas/easd_config.
 Command-line Option
@@ -1761,9 +1570,7 @@ Description
 Show help synopsis.
 Display version information.
 
-Table 18 - EAS Server (easd) Command-line Options
-
-5.2 EAS Server Signal Handler
+### 5.2 EAS Server Signal Handler
 The EAS Server handles signals in different ways providing different functionality. Signals can be sent with
 the kill(1) command and must be called from root or the owner of the easd process.
 Signal
@@ -1790,27 +1597,20 @@ Stops EAS Server easd.
 Special note: this also terminates the client connection
 associated with that instance of easd.
 
-Table 19 - EAS Server Signal Handler
-
-5.2.1 SIGHUP
+#### 5.2.1 SIGHUP
 If you wish to restart the EAS Server, for example after making changes to the configuration file
 /etc/eas/easd_config, execute the command:
 # kill
 
 1 `cat /var/run/easd.pid`
 
-Figure 48 - Example: restarting EAS Server
-
-43
-
-5.2.2 SIGUSR1
+#### 5.2.2 SIGUSR1
 If you wish to change the current LogLevel of the running EAS Server easd for debugging purposes execute
 the command:
 # kill
 
 10 `cat /var/run/easd.pid`
 
-Figure 49 - Example: Changing LogLevel of EAS Server
 Each time you send the signal SIGUSR1(10) to the EAS Server easd the LogLevel will change in a roundrobin fasion.
 Old LogLevel
 INFO
@@ -1824,26 +1624,22 @@ DEBUG2
 DEBUG3
 INFO
 
-Table 20 - LogLevel Round-robin Layout
-
-5.3 EAS Server Logs
+### 5.3 EAS Server Logs
 All EAS Server logs are written to syslog(2). Refer to chapter 2 sections 2.12 and 2.13 to configure the way
 EAS Server writes to syslog(2).
 
-5.4 Starting and Stopping the EAS Server
-5.4.1 Starting the EAS Server
+### 5.4 Starting and Stopping the EAS Server
+#### 5.4.1 Starting the EAS Server
+```
 # /usr/local/sbin/easd
-Figure 50 - Starting the EAS Server
+```
 
-5.4.2 Stopping the EAS Server
+#### 5.4.2 Stopping the EAS Server
+```
 # kill `cat /var/run/easd.pid`
-Figure 51 - Stopping the EAS Server
+```
 
-44
-
-Chapter 5.The EAS Server
-
-5.5 EAS Server Error Messages
+### 5.5 EAS Server Error Messages
 Error Message
 HookTimeout %i out of range.
 Port %i out of range.
@@ -1919,15 +1715,11 @@ resources or out of memory.
 This generally happens when easd cannot read and write
 to the database specified by SessionDirectory.
 
-Table 21 - EAS Server Error Messages
-
-45
-
-Chapter 6. The EAS Client
+## Chapter 6. The EAS Client
 The EAS Client is responsible for determining what shell to user; providing a shell to the user while
 transparently logging all shell activity and sending the audit log to the EAS Server.
 
-6.1 EAS Client Command-line options
+### 6.1 EAS Client Command-line options
 The EAS Client eash only supports minimal command-line options. All of the functionality is controlled and
 configured through the configuration file /etc/eas/eash_config.
 Command-line Option
@@ -1940,9 +1732,7 @@ Execute specified command.
 Show help synopsis.
 Display version information.
 
-Table 22 - EAS Client Command-line Options
-
-6.2 EAS Client Signal Handler
+### 6.2 EAS Client Signal Handler
 The EAS Client handles a minimum amount of signals, all of which terminate the session.
 Signal
 SIGINT
@@ -1963,13 +1753,11 @@ Table 23 - EAS Client Signal Handler
 Functionality
 Stops EAS Client eash.
 
-Chapter 6.The EAS Client
-
-6.3 Using EAS Client
+### 6.3 Using EAS Client
 The EAS Client eash is designed to be used directly from the command-line; as a login shell; and supports
 remote command execution such as file transfers with scp or rsync.
 
-6.3.1 EAS Client Environment
+#### 6.3.1 EAS Client Environment
 Once the EAS Client eash has been invoked, the following environment variables are inserted into the shell
 environment for your convenience.
 Environment Variable
@@ -2000,71 +1788,66 @@ Your real group name.
 Your real username.
 Your real UID.
 
-Table 24 - EAS Client Environment Variables
-
-6.3.1 SHELL Environment Variable
+#### 6.3.1 SHELL Environment Variable
 If you wish to use a specific shell when using the EAS Client eash you can specify that shell through the
 SHELL environment variable. For example if you wish to use the shell /bin/bash execute the command:
+```
 $ SHELL=/bin/bash eash
-
-Figure 52 - Example 1: Using SHELL environment variable with eash
+```
 or
+```
 $ export SHELL=/bin/bash
 $ eash
-
-Figure 53 - Example 2: Using SHELL environment variable with eash
+```
 or
+```
 $ setenv SHELL /bin/bash
 $ eash
-
-Figure 54 - Example 3: Using SHELL environment variable with eash
+```
 Special note: the shell must exist in /etc/shells to be considered valid.
 
-47
-
-6.3.2 Using EAS Client (eash) as a Login Shell
+#### 6.3.2 Using EAS Client (eash) as a Login Shell
 The EAS Client eash is very flexible when it comes to being used as a login shell. To use the EAS Client
 eash as a login shell, simply set the user’s login shell from /etc/passwd to the absolute path of the EAS Client
 eash. For example:
+```
 dhanks:x:500:500::/home/dhanks:/usr/local/bin/eash
+```
 
-Figure 55 - Example /etc/passwd entry using EAS Client as a login shell
 When invoked as a login shell in this fashion the default shell is defined in the EAS Client eash configuration
 file /etc/eas/eash_config with the option DefaultShell.
 
-6.3.3 The Symlink Trick
+#### 6.3.3 The Symlink Trick
 We understand that every user and application simply cannot use the same DefaultShell because each user
 and application has specific needs to perform their job. For example the application SAP is notorious for
 using the shell /bin/csh and oracle likes to use either /bin/sh or /usr/bin/ksh.
 To apply this customization you need to create a symlink to the EAS Client eash with the pathname to the
 shell you wish you use appended to the name replacing the character “/” with “_”.
 For example to force the user oracle to use /usr/bin/ksh
-# ln –s /usr/local/bin/eash /usr/local/bin/eash_usr_bin_ksh
+```
+# ln -s /usr/local/bin/eash /usr/local/bin/eash_usr_bin_ksh
+```
 
-Figure 56 - Using eash as a login shell over-riding DefaultShell option
 Now set oracle’s shell to /usr/local/bin/eash_usr_bin_ksh in /etc/passwd
+```
 oracle:x:500:500::/home/oracle:/usr/local/bin/eash_usr_bin_ksh
+```
 
-Figure 57 - Examle /etc/passwd entry for oracle using eash as login shell with /usr/bin/ksh as shell
 Special note: the shell must exist in /etc/shells to be considered valid.
 
-6.4 EAS Client Session Movies
+### 6.4 EAS Client Session Movies
 The EAS Client eash has the ability to record your own movies of your shell session. Just specify the
 filename you wish to save your session to as the first argument to eash and after your session has ended you
 can play it back with eas_play.
 For example to create a training video in /tmp/training.eas type:
+```
 $ eash /tmp/training.eas
+```
 
-Figure 58 - How to make your own session movie
-
-48
-
-Chapter 8. EAS Database Tool
-
-Chapter 7. EAS Database
+## Chapter 7. EAS Database
 The database schema used by EAS is fairly straight-forward and easy to use.
 
-7.1 EAS Database Schema
+### 7.1 EAS Database Schema
 Column Name
 id
 real_uid
@@ -2143,11 +1926,7 @@ PID of easd child.
 Time and date when the session was created.
 Last time and date of last modification.
 
-Table 25 - EAS Database Schema
-
-49
-
-7.1 EAS Database SQL
+### 7.1 EAS Database SQL
 This is the SQL command that was used to create the EAS database.
 CREATE TABLE USER
 (
@@ -2229,18 +2008,12 @@ UPDATE USER SET modified = DATETIME('now', 'localtime') WHERE id = new.id;
 
 END;
 
-Figure 59 - Table USER SQL Command
-
-50
-
-Chapter 7. EAS Database
-
-Chapter 8. EAS Database Tool
+## Chapter 8. EAS Database Tool
 The EAS Database Tool is provided for debugging purposes and creating backups of the database. If you
 wish to experiment with the database, it’s recommended that you experiment with a test and development
 instance of the database.
 
-8.1 EAS Database Tool Command-line Options
+### 8.1 EAS Database Tool Command-line Options
 Command-line Option
 -init filename
 -echo
@@ -2267,11 +2040,7 @@ Set text string for NULL values.
 Show version.
 Show help synopsis.
 
-Table 26 - EAS Database Tool Command-line Options
-
-51
-
-8.2 EAS Database Tool Interface
+### 8.2 EAS Database Tool Interface
 The EAS Database Tool has a very powerful interface that allows the user access to a complete set of SQL92 compliant commands to interact with the database.
 Internal Command
 .databases
@@ -2335,79 +2104,68 @@ List names of tables matching a LIKE pattern.
 Try opening locked tables for MS milliseconds.
 Set column widths for "column" mode.
 
-Table 27 - EAS Database Tool Interface Commands
-
-52
-
-Chapter 9. Backup and Recovery
-
-Chapter 9. Backup and Recovery
+## Chapter 9. Backup and Recovery
 The EAS Database Tool is used to create and restore the EAS database. It’s recommended that the EAS
 Database be backed up at least once a day during non-peak usage.
 
-9.1 Creating a Backup of the EAS Database
+### 9.1 Creating a Backup of the EAS Database
+```
 # eas_dbtool /var/log/easd/db .dump > /var/log/easd/db.backup
+```
 
-Figure 60 - Creating a backup of the EAS Database
 As you can see creating a backup is fairly straight forward and doesn’t require down-time.
 
-9.2 Creating a Backup of the EAS Audit Logs
+### 9.2 Creating a Backup of the EAS Audit Logs
 The EAS audit logs are just regular UNIX files that can be copied to a different location. We recommend
 using find and cpio.
+```
 # mkdir /var/log/easd/backup/
 # cd /var/log/easd && find . ! –name db | cpio –pdum /var/log/easd/backup
 40323 blocks
-#
+```
 
-Figure 61 - Creating abackup of the EAS Audit Logs
-
-9.3 Restoring EAS Database from a Backup
+### 9.3 Restoring EAS Database from a Backup
 Obviously this goes without saying, but when you perform a database restoration all data that is contained in
 the previous database is lost.
 Make sure that the EAS Server is stopped before you perform a database restoration. It’s possible that the
 database is currently open and being modified.
+```
 # kill `cat /var/run/easd.pid`
-
-Figure 62 - Stopping the EAS Server
+```
 Use the EAS Database Tool to import the backup file into a new database.
+```
 # eas_dbtool /var/log/easd/db
 sqlite> .read /path/to/database/backup
 sqlite> .quit
-#
+```
 
-Figure 63 - Restoring EAS Database from a previous backup
-
-53
-
-9.4 Restoring EAS Audit Logs from a Backup
+### 9.4 Restoring EAS Audit Logs from a Backup
 Once again it should go without saying that any previous data will be over-written when you restore data.
 The EAS Audit Logs are regular UNIX files and can be copied into place. Using the example from section
 9.2, we just used the commands find and cpio to perform the backup. Assuming we have a complete EAS
 Audit Log backup in /var/log/easd/backup we would execute the following command:
+```
 # cd /var/log/easd/backup/
 # find . ! -name db | cpio -pdum /var/log/easd
 40323 blocks
+```
 
 Figure 64 - Restoring EAS Audit Logs from previous backup
 
-54
-
-Chapter 10. EAS Replay
-
-Chapter 10. EAS Replay
+## Chapter 10. EAS Replay
 The true audit power of Enterprise Audit Shell is shown with the EAS Replay tool. This tool verifies the
 audit log signature to certify its integrity and replays the session just as it was originally recorded. EAS
 Replay offers a wide variety of replay options. Sessions can be played back in their original format; the
 speed can be interactively increased or decreased; or the sessions can be dumped to STDOUT and redirected
 if you wish to export the session as a file.
 
-10.1 EAS Replay Usage
+### 10.1 EAS Replay Usage
 Usage: eas_replay [-a] [-d speed] [-f from] [-gh] [-i IP] [-l limit] [-ns] [-t to] [-r]
 [-w maxwait] [-v] [ID]
 
 Figure 65 - EAS Replay Usage
 
-10.2 EAS Replay Command-line Options
+### 10.2 EAS Replay Command-line Options
 Command-line Option
 -a
 -d speed
@@ -2438,12 +2196,9 @@ Reverse sort.
 Set the maximum amount of time you wish to wait.
 Display version information.
 
-Table 28 - EAS Replay Command-line Options
-
-55
-
-10.3 Querying Audit Logs
-10.3.1 Show All Audit Logs
+### 10.3 Querying Audit Logs
+#### 10.3.1 Show All Audit Logs
+```
 [root@localhost root]# eas_replay -a
 =============================================================================
 Date (s1/\)
@@ -2493,10 +2248,10 @@ Note: if you replay an active (R) session, snoop-mode will be enabled.
 Example: eas_replay 6
 =============================================================================
 [root@localhost root]#
+```
 
-Figure 66 - Show all audit logs
-
-10.3.2 Show All Audit Logs Grouped by Username
+#### 10.3.2 Show All Audit Logs Grouped by Username
+```
 [root@localhost root]# eas_replay -ag
 =============================================================================
 Date (s2/\)
@@ -2546,14 +2301,10 @@ Note: if you replay an active (R) session, snoop-mode will be enabled.
 Example: eas_replay 5
 =============================================================================
 [root@localhost root]#
+```
 
-Figure 67 - Show all audit logs grouped by username
-
-56
-
-Chapter 10. EAS Replay
-
-10.3.3 Show Audit Logs by Specific Username
+#### 10.3.3 Show Audit Logs by Specific Username
+```
 [root@localhost root]# eas_replay -f root
 =============================================================================
 Date (s1/\)
@@ -2583,10 +2334,10 @@ Note: if you replay an active (R) session, snoop-mode will be enabled.
 Example: eas_replay 5
 =============================================================================
 [root@localhost root]#
+```
 
-Figure 68 - Show audit logs by specific username
-
-10.3.4 Show Audit Logs by Specific IP Address
+#### 10.3.4 Show Audit Logs by Specific IP Address
+```
 [root@localhost root]# eas_replay -i 127.0.0.1
 =============================================================================
 Date (s1/\)
@@ -2636,12 +2387,10 @@ Note: if you replay an active (R) session, snoop-mode will be enabled.
 Example: eas_replay 6
 =============================================================================
 [root@localhost root]#
+```
 
-Figure 69 - Show audit logs by specific IP address
-
-57
-
-10.3.5 Limit Audit Logs by the First 5 Records
+#### 10.3.5 Limit Audit Logs by the First 5 Records
+```
 [root@localhost root]# eas_replay -l 5
 =============================================================================
 Date (s1/\)
@@ -2686,24 +2435,17 @@ Note: if you replay an active (R) session, snoop-mode will be enabled.
 Example: eas_replay 5
 =============================================================================
 [root@localhost root]#
+```
 
-Figure 70 - Limit audit logs by the first 5 records
+#### 10.3.6 Example of Complicated Query
+* From “dhanks”
+* To “dhanks”
+* From the IP “127.0.0.1”
+* Group the results by username
+* Limit result set to 2 records.
+* Reverse the results.
 
-10.3.6 Example of Complicated Query
-•
-•
-•
-•
-•
-•
-
-From “dhanks”
-To “dhanks”
-From the IP “127.0.0.1”
-Group the results by username
-Limit result set to 2 records.
-Reverse the results.
-
+```
 [root@localhost root]# eas_replay -f dhanks -t dhanks -i 127.0.0.1 -g -l2 -r
 =============================================================================
 Date (s2\/)
@@ -2732,33 +2474,26 @@ Note: if you replay an active (R) session, snoop-mode will be enabled.
 Example: eas_replay 2
 =============================================================================
 [root@localhost root]#
+```
 
-Figure 71 - Example of complicated query
-
-58
-
-Chapter 10. EAS Replay
-
-10.4 Viewing an Audit Log
+### 10.4 Viewing an Audit Log
 To view an Audit Log simply give eas_replay the ID you wish to view. The ID is obtained from the
 eas_replay result set as described in the previous section 10.3.
 
+```
 [root@localhost root]# eas_replay 6
+```
 
-Figure 72 - Viewing an audit log
-
-10.5 Dumping an Audit Log to STDOUT
+### 10.5 Dumping an Audit Log to STDOUT
 To dump an Audit Log to STDOUT simply give eas_replay the ID you wish to view and include the “-n”
 option for “no wait”. The ID is obtained from the eas_replay result set as described in the previous section
 10.3.
 
-[root@localhost root]# eas_replay –n 6
+```
+[root@localhost root]# eas_replay -n 6
+```
 
-Figure 73 - Dumping an audit log to STDOUT
-
-59
-
-Chapter 11. EAS Report
+## Chapter 11. EAS Report
 Another powerful tool of Enterprise Audit Shell is the reporting functionality. EAS Report creates reports in
 HTML that is -//W3C//DTD HTML 4.01//EN compliant. EAS Report also takes advantage of Cascading
 Style Sheets (CSS) so that the power lies in your hands how the reports look and feel.
@@ -2768,7 +2503,7 @@ It’s recommended that you fine-tune what type of audit log criteria you want t
 before pushing it through EAS Report. The same command-line arguments you use with EAS Replay are the
 same command-line arguments that you would use with EAS Report.
 
-11.1 EAS Report Command-line Options
+### 11.1 EAS Report Command-line Options
 Command-line Option
 -a
 -c css _file
@@ -2796,29 +2531,17 @@ Limit records by the “To” field.
 Reverse sort.
 Display version information.
 
-Table 29 - EAS Report Command-line Options
 To obtain a detailed report supply EAS Report eas_report the ID as the first argument.
+```
 # eas_report 7
+```
 
-Figure 74 - Obtaining a detailed report
+### 11.2 Example Reports
+#### 11.2.1 Example Inventory Report
+#### 11.2.2 Example Detailed Report
 
-60
-
-Chapter 11. EAS Report
-
-11.2 Example Reports
-11.2.1 Example Inventory Report
-
-Figure 75 - Example EAS Inventory Report
-
-11.2.2 Example Detailed Report
-
-Figure 76 - Example EAS detailed report
-
-61
-
-11.3 Cascading Style Sheets (CSS) Layout
-11.3.1 CSS Layout for the Inventory Report
+### 11.3 Cascading Style Sheets (CSS) Layout
+#### 11.3.1 CSS Layout for the Inventory Report
 The inventory report makes use of CSS so that the look and feel of the report can be changed on-demand and
 isn’t subject to a rigid layout.
 The following CSS classes are defined in the EAS Inventory Report:
@@ -2864,13 +2587,7 @@ Last row on the right.
 Denotes an invalid signature.
 Denotes a verified signature.
 
-Figure 77 - CSS layout for the EAS inventory report
-
-62
-
-Chapter 11. EAS Report
-
-11.3.2 CSS Layout for the Detailed Report
+#### 11.3.2 CSS Layout for the Detailed Report
 The detailed report makes use of CSS so that the look and feel of the report can be changed on-demand and
 isn’t subject to a rigid layout.
 The following CSS classes are defined in the EAS Detailed Report:
@@ -2916,16 +2633,12 @@ Signature data.
 Denotes an invalid signature.
 Denotes a verified signature.
 
-Figure 78 - CSS layout for the EAS detailed report
-
-63
-
-Chapter 12. EAS Play
+## Chapter 12. EAS Play
 For the unprivileged user there is the EAS Play utility. This allows anyone, who has access to an EAS
 movie, to play it as it was originally recorded. For example if someone records their session with “eash
 /tmp/movie.eas” they could e-mail you the /tmp/movie.eas file and you could replay their session.
 
-12.1 EAS Play Command-line options.
+### 12.1 EAS Play Command-line options.
 Command-line Option
 -d speed
 -h
@@ -2933,9 +2646,6 @@ Command-line Option
 -s
 -w maxwait
 -v
-Table 30 - EAS Play Command-line Options
-
-64
 
 Description
 Speed to playback. Default is 1.0.
@@ -2944,143 +2654,3 @@ No wait – dump output to stdout.
 Snoop on a running session.
 Maximum time you want to wait on the session.
 Display version information.
-
-Index
-
-Index
-/
-/etc/passwd............19, 29, 44, 47
-/usr/local/bin/eash .............29, 47
-/usr/local/sbin/easd................. 43
-/var/log/easd/db...................... 52
-
-A
-
-effective_gr_name ............ 48, 49
-effective_pw_name..... 48, 49, 62
-effective_uid..................... 48, 49
-EGDFile ........................... 26, 33
-
-H
-HookFailureCritical................15
-HookTimeout ................... 15, 44
-HP-UX....................................11
-
-AIX ........................................ 11
-
-I
-B
-Backup ..............................52, 53
-BannerFile.............................. 30
-BannerPause .......................... 30
-BSD ....................................... 11
-Bugs ....................................... 10
-
-IdleTimeout ...................... 20, 44
-INFO .................... 22, 23, 43, 44
-
-K
-KeepAlive...............................12
-
-C
-
-L
-
-Certificate Authorities............ 34
-CertificateAuthority ....26, 33, 41
-Certificates............34, 35, 40, 41
-Cipher .........................24, 31, 62
-CSS .............................59, 61, 62
-
-Legal Notice .............................2
-Linux ......................................11
-LogLevel ........ 22, 23, 42, 43, 44
-LogServer ......................... 27, 28
-
-D
-Database..........48, 49, 50, 51, 52
-DEBUG1 ....................23, 43, 44
-DEBUG2 ....................23, 43, 44
-DEBUG3 ....................23, 43, 44
-DefaultShell ......................29, 47
-Digital Signatures .............16, 17
-duration.......................48, 49, 62
-
-E
-EAS Client ....27, 28, 29, 30, 31,
-32, 33, 41, 45, 46, 47
-EAS Replay ................17, 54, 59
-EAS Report............................ 59
-EAS Server ... 12, 13, 14, 15, 17,
-18, 19, 20, 21, 22, 23, 24, 25,
-26, 27, 41, 42, 43, 44, 45, 52
-eas_replay 13, 14, 54, 55, 56, 57,
-58
-effective_gid .....................48, 49
-
-M
-Mac OS X...............................11
-Method.................. 25, 32, 44, 62
-mkcerts ................. 25, 32, 35, 36
-
-N
-NotificationHook........ 13, 14, 15
-
-PrivateKey ............25, 26, 32, 33
-
-R
-RandomFile...................... 26, 33
-real_gid ............................ 48, 49
-real_gr_name ................... 48, 49
-real_pw_name ............ 48, 49, 62
-real_uid ............................ 48, 49
-Recovery ................................ 52
-remote_command............. 48, 49
-
-S
-SessionDirectory ........ 18, 19, 44
-SHELL ................................... 46
-SIGABRT ........................ 42, 45
-SIGHUP ................................. 42
-SIGINT ............................ 42, 45
-SignCtime ........................ 16, 17
-SignInode ......................... 16, 17
-SignMode......................... 16, 17
-SignMtime ....................... 16, 17
-SignOwner ....................... 16, 17
-SIGPIPE........................... 42, 45
-SIGQUIT ......................... 42, 45
-SIGTERM........................ 42, 45
-SIGUSR1 ......................... 42, 43
-Solaris .................................... 11
-SQL.................................. 49, 51
-SQL-92 .................................. 51
-SSL ... 24, 25, 26, 31, 32, 33, 34,
-44, 48, 62
-Supported Platforms............... 11
-Symlink............................ 29, 47
-Sync ....................................... 20
-SyslogFacility .................. 21, 44
-SyslogPriority ............ 22, 23, 44
-
-O
-original_gid ...................... 48, 49
-original_gr_name.............. 48, 49
-original_pw_name ...... 48, 49, 62
-original_uid ...................... 48, 49
-
-P
-PidFile .............................. 18, 44
-port ....................... 12, 27, 48, 49
-Port ............................. 12, 27, 44
-
-T
-TCPTimeout........................... 27
-terminal .....10, 13, 14, 48, 49, 62
-
-U
-User............................ 19, 22, 44
-
-65
-
-
